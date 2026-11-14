@@ -1,0 +1,59 @@
+# Production-like stack: MongoDB + API + web (nginx). Copy .env.example to .env first.
+#   docker compose up -d --build
+#   docker compose exec api python -m scripts.seed_manager admin
+#   docker compose exec api python -m scripts.import_data
+# The bank, taxonomy and catalog are mounted read-only from the workspace (one folder up).
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:?set MONGO_USER in .env}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS:?set MONGO_PASS in .env}
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    # no published port: only the API can reach the database
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      APP_ENV: prod
+      MONGO_URL: mongodb://mongo:27017
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASS: ${MONGO_PASS}
+      MONGO_DB: azmoonrep
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET (32+ chars) in .env}
+      TRUST_PROXY: "1"
+      SMS_PROVIDER: ${SMS_PROVIDER:-kavenegar}
+      SMS_API_KEY: ${SMS_API_KEY:-}
+      SMS_TEMPLATE: ${SMS_TEMPLATE:-azmoonrep-otp}
+      PASSWORD_LOGIN_FOR_STUDENTS: ${PASSWORD_LOGIN_FOR_STUDENTS:-0}
+      BOOKS_JSON: /data/main books/books_catalog.json
+      TAXONOMY_DIR: /data/taxonomy
+      QUESTIONS_ROOT: /data/question_bank
+      LOG_LEVEL: INFO
+    volumes:
+      - question-figures:/app/static/questions
+      - ../question_bank:/data/question_bank:ro
+      - ../taxonomy:/data/taxonomy:ro
+      - ../main books:/data/main books:ro
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on: [api]
+    ports:
+      - "${WEB_PORT:-8080}:80"
+
+volumes:
+  mongo-data:
+  question-figures:

@@ -1,0 +1,4 @@
+anthropic==2.8.0
+pymupdf==2.1
+pillow==13.0.0
+numpy==2.5.4

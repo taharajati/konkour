@@ -1,0 +1,8 @@
+# pinned: tested versions (python -m pytest tests). Upgrade deliberately, then re-run tests.
+fastapi==0.163.0
+starlette==1.10.0
+uvicorn[standard]==0.54.0
+pymongo==4.20.0
+PyJWT==2.15.1
+pydantic==2.14.3
+tzdata==2026.6          # IANA time zones (Asia/Tehran), needed on Windows and slim images

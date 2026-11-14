@@ -1,0 +1,14 @@
+# secrets
+azmoonrep/backend/.jwt_secret
+.env
+azmoonrep/.env
+
+# environments and build output
+pipeline/.venv/
+azmoonrep/backend/.venv/
+azmoonrep/frontend/node_modules/
+azmoonrep/frontend/dist/
+__pycache__/
+
+# pipeline work folders (page renders, crops, cached model answers)
+pipeline/work/
