@@ -1,6 +1,7 @@
-﻿import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { get, post, patch, getBlobUrl } from './api'
 import Markdown from './Markdown'
+import Figure, { FigureImage } from './Figure'
 
 const TABS = [["questions", "مرور سؤالات"], ["coverage", "پوشش نکته‌ها"], ["reports", "گزارش خطاها"], ["import", "وارد کردن"], ["stats", "آمار"]]
 const VERIFY_LABEL = {
@@ -164,7 +165,7 @@ function QuestionsTab() {
                   {q.needs_answer_verification && <span className="badge warn">مشک‌دار</span>}
                   {q.outlier && <span className="badge warn">پرت</span>}
                   {q.served > 0 && <span className="badge">{q.served} پاسخ · {Math.round((q.correct_rate || 0) * 100)}٪</span>}
-                  {q.figures?.length > 0 && <span className="badge">شکل</span>}
+                  {q.has_figure && <span className="badge">شکل</span>}
                   <span className="badge">{q.public_id}</span>
                 </div>
               ))}
@@ -319,7 +320,7 @@ function QuestionDetail({ publicId, onClose, onReviewed }) {
         ) : (
           <div className="stem"><Markdown text={q.stem_md} /></div>
         )}
-        {q.figures?.map(f => <img key={f} className="figure" src={f} alt="شکل" />)}
+        {q.figures?.map(f => <Figure key={f.url} fig={f} />)}
 
         {q.options && !editing && (
           <>
@@ -328,7 +329,7 @@ function QuestionDetail({ publicId, onClose, onReviewed }) {
               {q.options.map((o, i) => (
                 <div key={i} className={`option ${q.answer?.option === i + 1 ? 'correct' : ''}`}>
                   <span className="opt-num">{i + 1}</span>
-                  <Markdown text={o} />
+                  {q.option_figures?.[i] ? <FigureImage fig={q.option_figures[i]} alt={`شکل گزینهٔ ${i + 1}`} /> : <Markdown text={o} />}
                   {q.answer?.option === i + 1 && <span className="badge">پاسخ</span>}
                 </div>
               ))}

@@ -27,6 +27,7 @@ def make_token(user: dict) -> str:
         "sub": user["username"],
         "uid": str(user["_id"]),
         "role": user.get("role", "student"),
+        "tv": user.get("token_version", 0),
         "exp": int(time.time()) + JWT_EXPIRE_HOURS * 3600,
     }
     return jwt.encode(payload, JWT_SECRET, algorithm="HS256")
@@ -41,6 +42,9 @@ def current_user(cred: HTTPAuthorizationCredentials = Depends(bearer)) -> dict:
     user = db.db.users.find_one({"username": payload["sub"]})
     if not user:
         raise HTTPException(401, "user not found")
+    # "log out everywhere" bumps token_version: older tokens stop working at once
+    if payload.get("tv", 0) != user.get("token_version", 0):
+        raise HTTPException(401, "invalid or expired token")
     return user
 
 def require_admin(user: dict = Depends(current_user)) -> dict:

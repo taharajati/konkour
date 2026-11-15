@@ -156,6 +156,26 @@ def make_perm(q: dict) -> list | None:
     return perm
 
 
+def figure_view(public_id: str, f) -> dict | None:
+    """a stored figure ({file, w, h}; plain file name in older documents) as the client
+    sees it: url plus pixel size, so the page can reserve its box before it loads"""
+    if not f:
+        return None
+    if isinstance(f, str):
+        f = {"file": f}
+    return {"url": f"/static/questions/{public_id}/{f['file']}", "w": f.get("w"), "h": f.get("h")}
+
+
+def question_figures(q: dict, perm: list | None = None) -> dict:
+    """figures of a question for display. option_figures follow the slot's option order."""
+    pid = q.get("public_id")
+    of = q.get("option_figures")
+    if of and perm and len(perm) == len(of):
+        of = [of[p - 1] for p in perm]
+    return {"figures": [figure_view(pid, f) for f in q.get("figures") or []],
+            "option_figures": [figure_view(pid, f) for f in of] if of else None}
+
+
 def display_options(q: dict, perm: list | None) -> list | None:
     opts = q.get("options")
     if not opts or not perm:

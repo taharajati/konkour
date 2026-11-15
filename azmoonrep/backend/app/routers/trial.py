@@ -38,7 +38,7 @@ def _servable_concepts(grade: int | None) -> list:
     for c in db.db.concepts.find(q).sort("order_in_curriculum", 1):
         qs = [x for x in db.db.questions.find({"concept_id": c["concept_id"], **scheduler.SERVABLE,
                                                "type": "multiple_choice_4"})
-              if scheduler._has_key(x) and not x.get("figures")]
+              if scheduler._has_key(x) and not x.get("figures") and not x.get("option_figures")]
         if qs:
             qs.sort(key=lambda x: x.get("difficulty", 3))
             out.append((c, qs[0]))

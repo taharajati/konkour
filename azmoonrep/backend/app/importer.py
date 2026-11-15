@@ -13,7 +13,7 @@ import shutil
 import hashlib
 import datetime as dt
 from pymongo import UpdateOne
-from . import db
+from . import clock, db
 from .config import STATIC_QUESTIONS_DIR
 
 
@@ -96,7 +96,7 @@ def import_books(books_json_path: str) -> dict:
                       "grade": b.get("grade") or _grade_fa_to_num(b.get("paaye")),
                       "paaye": b.get("paaye"), "reshte": b.get("reshte"),
                       "dore": b.get("dore"), "order": order,
-                      "updated_at": dt.datetime.utcnow()}},
+                      "updated_at": clock.now_utc()}},
             upsert=True)
         for ch in b.get("chapters", []):
             ch_id = f"{book_id}_ch{ch['n']}"
@@ -149,7 +149,7 @@ def import_taxonomy(taxonomy_dir: str) -> dict:
                           # book order, then the concept's order inside the book
                           "order_in_curriculum": book.get("order", 0) * 10000 + c["order"],
                           "source": "taxonomy",
-                          "updated_at": dt.datetime.utcnow()}},
+                          "updated_at": clock.now_utc()}},
                 upsert=True)
             n += 1
     return {"concepts": n}
@@ -165,9 +165,11 @@ CONTENT_FIELDS = ("stem_md", "options", "answer", "solution_md", "difficulty", "
 
 
 def clean_stem(md: str, has_options: bool) -> str:
-    """bank question.md starts with «# سؤال N» and lists the options for human readers;
+    """figures are shown from meta.json, never from image links inside the text.
+    bank question.md starts with «# سؤال N» and lists the options for human readers;
     students get the options separately, so drop both from the stem"""
-    lines = (md or "").strip().splitlines()
+    md = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", md or "")
+    lines = md.strip().splitlines()
     if lines and re.match(r"^#\s*سؤال\s*[\d۰-۹]+", lines[0]):
         lines = lines[1:]
     if has_options:
@@ -229,7 +231,15 @@ def import_questions(questions_root: str) -> dict:
                 # answer.md hold the answer key, and source_page/question_shot are
                 # publisher scans: none of them may be publicly downloadable.
                 dest = os.path.join(STATIC_QUESTIONS_DIR, public_id)
-                figures = _publish_figures(qpath, dest)
+                wanted = None
+                if "option_figures" in meta or meta.get("figure_source"):
+                    wanted = list(meta.get("figures") or []) + \
+                        [f for f in meta.get("option_figures") or [] if f]
+                published = _publish_figures(qpath, dest, wanted)
+                opt_names = meta.get("option_figures") or []
+                figures = [v for k, v in published.items() if k not in opt_names]
+                option_figures = [published.get(n) if n else None for n in opt_names] \
+                    if any(opt_names) else None
 
                 ans_opt = meta.get("answer_option")
                 conf = meta.get("answer_confidence")
@@ -251,7 +261,8 @@ def import_questions(questions_root: str) -> dict:
                     "chapter_id": (concept_doc or {}).get("chapter_id"),
                     "type": meta.get("question_type", "multiple_choice_4"),
                     "verification": meta.get("verification"),
-                    "figures": figures,
+                    "figures": figures,                  # [{file, w, h}]
+                    "option_figures": option_figures,    # per option, or None
                     "needs_answer_verification": conf == "low"
                                                  or meta.get("needs_answer_verification", False),
                     "answer_confidence": conf,
@@ -259,7 +270,7 @@ def import_questions(questions_root: str) -> dict:
                     "storage_path": dest,
                     # private bank folder: scans are served to admins only, from here
                     "source_path": os.path.abspath(qpath),
-                    "imported_at": dt.datetime.utcnow(),
+                    "imported_at": clock.now_utc(),
                 }
                 # every imported question starts as pending and needs a manager's
                 # approval (DESIGN principle 5). Self-reported LLM confidence is not
@@ -284,23 +295,63 @@ PRIVATE_IMAGES = {"source_page.png", "question_shot.png"}
 IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp")
 
 
-def _publish_figures(src_dir: str, dest_dir: str) -> list:
+def image_size(path: str):
+    """(width, height) of a PNG / JPEG / GIF from its header; None if unknown.
+    The frontend reserves the figure's box from these, so the page never jumps."""
+    import struct
+    try:
+        with open(path, "rb") as f:
+            head = f.read(32)
+            if head[:8] == b"\x89PNG\r\n\x1a\n":
+                return struct.unpack(">II", head[16:24])
+            if head[:6] in (b"GIF87a", b"GIF89a"):
+                return struct.unpack("<HH", head[6:10])
+            if head[:2] == b"\xff\xd8":
+                f.seek(2)
+                while True:
+                    marker = f.read(4)
+                    if len(marker) < 4 or marker[0] != 0xFF:
+                        return None
+                    size = struct.unpack(">H", marker[2:4])[0]
+                    if 0xC0 <= marker[1] <= 0xCF and marker[1] not in (0xC4, 0xC8, 0xCC):
+                        h, w = struct.unpack(">HH", f.read(5)[1:5])
+                        return w, h
+                    f.seek(size - 2, 1)
+    except (OSError, struct.error):
+        pass
+    return None
+
+
+def _publish_figures(src_dir: str, dest_dir: str, names: list | None = None) -> dict:
     """copy figure images from a bank folder into the public static folder.
-    Re-copies on every import so fixes in the bank reach the served files, and
-    removes anything else (answer keys, scans) left there by older imports."""
+
+    Files are stored under a name made from their content hash, so a changed figure
+    gets a new URL (browsers and CDNs can cache figures forever) and the bank's file
+    names never leak. Returns {bank name: {"file", "w", "h"}}. Anything else in the
+    destination (older copies, answer keys, scans) is removed."""
     if not os.path.isdir(src_dir):
-        return []
-    figures = sorted(f for f in os.listdir(src_dir)
-                     if f.lower().endswith(IMAGE_EXTS) and f not in PRIVATE_IMAGES)
+        return {}
+    if names is None:
+        names = sorted(f for f in os.listdir(src_dir)
+                       if f.lower().endswith(IMAGE_EXTS) and f not in PRIVATE_IMAGES)
+    out = {}
     os.makedirs(dest_dir, exist_ok=True)
+    for name in names:
+        src = os.path.join(src_dir, os.path.basename(name))
+        if name in PRIVATE_IMAGES or not name.lower().endswith(IMAGE_EXTS) or not os.path.isfile(src):
+            continue
+        with open(src, "rb") as fh:
+            digest = hashlib.sha1(fh.read()).hexdigest()[:16]
+        hashed = digest + os.path.splitext(name)[1].lower()
+        shutil.copy2(src, os.path.join(dest_dir, hashed))
+        size = image_size(src)
+        out[name] = {"file": hashed, "w": size[0] if size else None, "h": size[1] if size else None}
+    keep = {v["file"] for v in out.values()}
     for name in os.listdir(dest_dir):
         p = os.path.join(dest_dir, name)
-        if os.path.isfile(p) and name not in figures:
+        if os.path.isfile(p) and name not in keep:
             os.remove(p)
-    for f in figures:
-        shutil.copy2(os.path.join(src_dir, f), os.path.join(dest_dir, f))
-    return figures
-
+    return out
 
 def purge_private_static_files() -> int:
     """remove answer keys / scans from every folder under the static questions dir"""
@@ -335,7 +386,7 @@ def _ensure_concept(concept_id, grade, book_name, chapter_title, topic, sub):
         "grade": grade, "book_name": book_name, "chapter_title": chapter_title,
         "topic": topic, "subtopic": sub,
         "order_in_curriculum": order,
-        "created_at": dt.datetime.utcnow()})
+        "created_at": clock.now_utc()})
 
 
 def clean_solution(text: str | None, ans_opt) -> str:
@@ -370,7 +421,7 @@ def clean_solution(text: str | None, ans_opt) -> str:
 
 def _difficulty_heuristic(meta: dict) -> int:
     conf = meta.get("answer_confidence")
-    if meta.get("figures"):
+    if meta.get("figures") or any(meta.get("option_figures") or []):
         return 4          # geometry/figure questions tend to be harder
     if conf == "low":
         return 3

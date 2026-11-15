@@ -1,6 +1,6 @@
-﻿import React, { useState } from 'react'
+import React, { useState } from 'react'
 import JalaliDate from './JalaliDate'
-import { patch } from './api'
+import { patch, post, clearToken } from './api'
 import { fa, jalali, daysUntil, getTheme, applyTheme } from './ui'
 
 export const LOADS = [[10, 'سبک', 'حدود ۱۵ دقیقه'], [20, 'معمولی', 'حدود ۳۰ دقیقه'], [40, 'سنگین', 'حدود ۶۰ دقیقه']]
@@ -87,6 +87,11 @@ export default function Settings({ user, onSaved, onEditPlan, onLogout }) {
 
       <div className="card">
         <button className="danger wide" onClick={onLogout}>خروج از حساب</button>
+        <button className="wide" onClick={async () => {
+          if (!window.confirm('از همهٔ دستگاه‌ها خارج می‌شوی و باید دوباره وارد شوی. ادامه می‌دهی؟')) return
+          try { await post('/auth/logout-all', {}); clearToken(); window.location.reload() }
+          catch (e) { setError(e.message) }
+        }}>خروج از همهٔ دستگاه‌ها</button>
       </div>
     </div>
   )

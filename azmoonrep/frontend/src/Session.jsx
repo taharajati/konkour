@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { get, post } from './api'
 import Markdown from './Markdown'
 import Icon from './Icons'
+import Figure, { FigureImage, Lightbox } from './Figure'
 import Mascot from './Mascot'
 
 const BASE = { daily: '/sessions/daily', practice: '/sessions/practice', placement: '/sessions/placement' }
@@ -33,6 +34,7 @@ export default function Session({ mode = 'daily', resume = false, dailyBookId = 
   const [reportSent, setReportSent] = useState(false)
   const [lesson, setLesson] = useState(null)   // key-point card shown before a new concept
   const [writtenSolution, setWrittenSolution] = useState(null)
+  const [zoomed, setZoomed] = useState(null)      // option figure opened large
   const startTime = useRef(Date.now())
   const busy = useRef(false)          // blocks double submit (Enter + click, double Enter)
   const base = BASE[mode]
@@ -203,6 +205,7 @@ export default function Session({ mode = 'daily', resume = false, dailyBookId = 
   const done = feedback?.done ?? session.slots.filter(s => s.status === 'answered').length
   const correctText = feedback?.correct_option != null ? question.options?.[feedback.correct_option - 1] : null
   const written = question.type === 'tashrihi'
+  const optFigs = question.option_figures?.some(Boolean) ? question.option_figures : null
   const due = relativeDue(feedback?.next_due)
 
   return (
@@ -236,20 +239,28 @@ export default function Session({ mode = 'daily', resume = false, dailyBookId = 
         )}
         {question.repeat && <div className="repeat-banner">تکرار سؤال قبلی؛ فعلاً سؤال جدیدی برای این مبحث نداریم</div>}
         <div className="stem"><Markdown text={question.stem_md} /></div>
-        {question.figures?.map((f, i) => <img key={f} className="figure" src={f} alt={`شکل ${fa(i + 1)} سؤال`} loading="lazy" />)}
+        {question.figures?.map((f, i) => <Figure key={f.url} fig={f} alt={`شکل ${fa(i + 1)} سؤال`} />)}
         {question.options && (
-          <div className="options" role="radiogroup" aria-label="گزینه‌ها">
+          <div className={`options ${optFigs ? 'options-figs' : ''}`} role="radiogroup" aria-label="گزینه‌ها">
             {question.options.map((opt, i) => (
-              <button key={i} type="button" role="radio" aria-checked={selected === i + 1}
+              <div key={i} className="opt-cell">
+              <button type="button" role="radio" aria-checked={selected === i + 1}
                    disabled={!!feedback}
                    className={`option ${selected === i + 1 ? 'selected' : ''} ${feedback && feedback.correct_option != null && i + 1 === feedback.correct_option ? 'correct' : ''} ${feedback && selected === i + 1 && feedback.correct_option !== i + 1 ? 'wrong' : ''}`}
                    onClick={() => !feedback && setSelected(i + 1)}>
                 <span className="opt-num">{fa(i + 1)}</span>
-                <Markdown text={opt} />
+                {optFigs?.[i] ? <FigureImage fig={optFigs[i]} alt={`شکل گزینهٔ ${fa(i + 1)}`} eager /> : <Markdown text={opt} />}
               </button>
+              {optFigs?.[i] && (
+                <button type="button" className="opt-zoom" aria-label={`بزرگ‌نمایی شکل گزینهٔ ${fa(i + 1)}`} onClick={() => setZoomed(optFigs[i])}>
+                  <Icon name="zoom" size={18} />
+                </button>
+              )}
+              </div>
             ))}
           </div>
         )}
+        {zoomed && <Lightbox fig={zoomed} alt="شکل گزینه" onClose={() => setZoomed(null)} />}
         {!feedback && written && (
           // written question: solve on paper, compare with the solution, grade yourself
           <div className="answer-actions">

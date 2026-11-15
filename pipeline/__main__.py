@@ -40,7 +40,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser(prog="pipeline")
     ap.add_argument("cmd", choices=["prepare", "estimate", "run", "report", "write",
                                     "validate-taxonomy", "apply-map", "generate",
-                                    "draft-taxonomy"])
+                                    "draft-taxonomy", "figures"])
+    ap.add_argument("--apply", action="store_true", help="figures: write into the bank")
     ap.add_argument("--only", help="generate: comma list of concept ids")
     ap.add_argument("--pages", help="draft-taxonomy: PDF page range of the chapter, e.g. 75-99")
     ap.add_argument("args", nargs="*")
@@ -60,6 +61,12 @@ def main(argv=None):
         return 1 if problems else 0
     if a.cmd == "apply-map":
         print(bank.apply_map(a.args[0], a.args[1]))
+        return 0
+    if a.cmd == "figures":
+        from . import figures
+        rep = figures.run(a.args[0], a.args[1], work_dir(a.args[0]), apply=a.apply)
+        for k, v in rep.items():
+            print(f"{k}: {v}")
         return 0
     if a.cmd == "generate":
         from . import generate

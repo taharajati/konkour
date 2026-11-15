@@ -13,7 +13,7 @@ def public_question(q: dict, perm: list | None = None) -> dict:
         "stem_md": q.get("stem_md"),
         "options": scheduler.display_options(q, perm),
         "type": q.get("type", "multiple_choice_4"),
-        "figures": [f"/static/questions/{q['public_id']}/{f}" for f in q.get("figures", [])],
+        **scheduler.question_figures(q, perm),
         "concept_id": q.get("concept_id"),
     }
 

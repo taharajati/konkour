@@ -12,3 +12,16 @@ __pycache__/
 
 # pipeline work folders (page renders, crops, cached model answers)
 pipeline/work/
+
+# personal data of a student (name, school, city): never in the repo
+landing.html
+student_profile.md
+
+# copyrighted source material and publisher scans stay on disk / the server only
+konkur_math_tests/
+main books/*.pdf
+question_bank/
+azmoonrep/backend/static/questions/
+**/source_page.png
+**/question_shot.png
+design/identities.html

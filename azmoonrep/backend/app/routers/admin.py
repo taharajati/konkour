@@ -3,7 +3,7 @@ import datetime as dt
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from .. import db, auth
+from .. import db, auth, clock, scheduler
 from ..logging_setup import audit
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -163,7 +163,7 @@ def list_questions(status: str = "all", concept_id: str | None = None,
             "review_status": d.get("review_status", "pending"),
             "answer_option": (d.get("answer") or {}).get("option"),
             "needs_answer_verification": d.get("needs_answer_verification", False),
-            "figures": d.get("figures", []),
+            "has_figure": bool(d.get("figures") or d.get("option_figures")),
             "served": n, "correct_rate": rate,
             "outlier": bool(n >= 10 and (rate is None or rate < 0.15 or rate > 0.95))})
     return {"total": total, "items": items}
@@ -177,7 +177,7 @@ def bulk_review(body: BulkReviewBody, user: dict = Depends(auth.require_admin)):
         raise HTTPException(422, "no questions selected")
     if not body.approved and not (body.note and body.note.strip()):
         raise HTTPException(422, "bulk rejection requires a note")
-    now = dt.datetime.utcnow()
+    now = clock.now_utc()
     db.db.questions.update_many(
         {"public_id": {"$in": body.public_ids}},
         {"$set": {"review_status": "approved" if body.approved else "rejected",
@@ -229,7 +229,7 @@ def question_detail(public_id: str, user: dict = Depends(auth.require_admin)):
         "verification": d.get("verification"),
         "concept_title": (db.db.concepts.find_one({"concept_id": d.get("concept_id")},
                                                   {"title": 1}) or {}).get("title"),
-        "figures": [f"/static/questions/{public_id}/{f}" for f in d.get("figures", [])],
+        **scheduler.question_figures(d),
         "screenshot": f"/admin/questions/{public_id}/scan/question",
         "source_page": f"/admin/questions/{public_id}/scan/page",
         "served": served, "correct": correct,
@@ -252,7 +252,7 @@ def edit_question(public_id: str, body: EditBody,
     d = db.db.questions.find_one({"public_id": public_id})
     if not d:
         raise HTTPException(404, "question not found")
-    update: dict = {"edited_by": user["username"], "edited_at": dt.datetime.utcnow()}
+    update: dict = {"edited_by": user["username"], "edited_at": clock.now_utc()}
     if body.stem_md is not None: update["stem_md"] = body.stem_md
     if body.solution_md is not None: update["solution_md"] = body.solution_md
     if body.difficulty is not None:
@@ -280,7 +280,7 @@ def _push_history(public_id: str, action: str, by: str, note: str | None = None)
     db.db.questions.update_one(
         {"public_id": public_id},
         {"$push": {"history": {"action": action, "by": by,
-                               "at": dt.datetime.utcnow(), "note": note}}})
+                               "at": clock.now_utc(), "note": note}}})
 
 
 class ReviewBody(BaseModel):
@@ -297,7 +297,7 @@ def review_question(public_id: str, body: ReviewBody,
         "review_status": "approved" if body.approved else "rejected",
         "reviewed": body.approved,
         "reviewed_by": user["username"],
-        "reviewed_at": dt.datetime.utcnow(),
+        "reviewed_at": clock.now_utc(),
     }
     if not body.approved:
         if not (body.note and body.note.strip()):
@@ -354,7 +354,7 @@ def resolve_report(report_id: str, body: ReportResolveBody,
                       "needs_answer_verification": True},
              "$push": {"history": {"action": "student_report_confirmed",
                                    "by": user["username"],
-                                   "at": dt.datetime.utcnow(),
+                                   "at": clock.now_utc(),
                                    "note": rep["note"]}}})
     return {"ok": True}
 

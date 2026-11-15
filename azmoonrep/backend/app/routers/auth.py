@@ -148,6 +148,13 @@ def otp_verify(body: OtpVerify, request: Request):
     return {"access_token": auth.make_token(user), "role": "student", "new_user": new_user,
             "display_name": user.get("display_name")}
 
+@router.post("/logout-all")
+def logout_everywhere(user: dict = Depends(auth.current_user)):
+    """invalidate every token of this account (lost phone, shared computer)"""
+    db.db.users.update_one({"_id": user["_id"]}, {"$inc": {"token_version": 1}})
+    audit(user["username"], "logout_all")
+    return {"ok": True}
+
 @router.get("/me/stats")
 def my_stats(user: dict = Depends(auth.current_user)):
     return scheduler.student_stats(user["_id"])

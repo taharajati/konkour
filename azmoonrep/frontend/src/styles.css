@@ -813,3 +813,32 @@ button.option:hover:not(:disabled) { border-color: var(--text); background: var(
 .jd-day.today { border-color: var(--border); }
 .jd-day.on, .jd-day.on:hover:not(:disabled) { background: var(--primary); color: #fff; font-weight: 700; }
 .jd-foot { display: flex; justify-content: space-between; margin-top: 8px; }
+
+/* figures: white card (scans are black on white), reserved box, tap to zoom */
+.fig { margin: 14px 0; text-align: center; }
+.fig-btn { position: relative; display: inline-block; max-width: 100%; padding: 10px; background: #fff;
+           border: 1px solid var(--border); border-radius: 12px; cursor: zoom-in; line-height: 0; }
+.fig-btn:hover:not(:disabled) { background: #fff; border-color: var(--text); }
+.fig img, .opt-cell img { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+.fig-zoom, .opt-zoom { position: absolute; inset-block-end: 6px; inset-inline-end: 6px; width: 30px; height: 30px;
+            border-radius: 50%; background: #fff; border: 1px solid #d9d9d9; color: #111; display: grid; place-items: center; }
+.fig figcaption { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+.fig-failed { display: inline-block; padding: 18px; font-size: 13px; color: var(--muted); line-height: 1.6; }
+.opt-cell { position: relative; }
+.options-figs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.options-figs .option { flex-direction: column; align-items: stretch; gap: 8px; margin: 0; height: 100%; padding: 10px; background: #fff; color: #111; }
+.options-figs .option .opt-num { align-self: flex-start; }
+.options-figs .option.selected, .options-figs button.option:hover:not(:disabled) { background: #fff; border-color: var(--text); }
+.options-figs .option.correct { border-color: var(--ok); background: #fff; }
+.options-figs .option.wrong { border-color: var(--bad); background: #fff; }
+.opt-zoom { padding: 0; cursor: zoom-in; }
+@media (max-width: 340px) { .options-figs { grid-template-columns: 1fr; } }
+.lightbox { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.82); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; padding: 56px 12px 12px; }
+.lightbox-scroll { max-width: 100%; max-height: 100%; overflow: auto; background: #fff; border-radius: 12px; padding: 14px;
+                   -webkit-overflow-scrolling: touch; }
+.lightbox-scroll img { display: block; max-width: 100%; max-height: calc(100dvh - 150px); cursor: zoom-in; margin: 0 auto; }
+.lightbox-scroll.big img { max-height: none; cursor: zoom-out; }
+.lightbox-close { position: absolute; top: 12px; inset-inline-end: 12px; width: 40px; height: 40px; border-radius: 50%;
+                  background: #fff; color: #111; border: none; display: grid; place-items: center; padding: 0; }
+.lightbox-hint { color: #fff; font-size: 12.5px; margin: 10px 0 0; opacity: .8; }

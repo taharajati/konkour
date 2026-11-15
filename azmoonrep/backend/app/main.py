@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import db, logging_setup
+from . import db, errors, logging_setup, migrations
 from .config import APP_ENV, STATIC_QUESTIONS_DIR
 from .routers import admin, auth, curriculum, me_books, sessions, trial
 
@@ -21,6 +21,7 @@ async def lifespan(app: FastAPI):
     if removed:
         logging_setup.log.warning(f"removed {removed} private files from public static folder")
     db.ensure_indexes()
+    migrations.run()
     logging_setup.log.info(f"started (env={APP_ENV})")
     yield
 
@@ -28,6 +29,22 @@ async def lifespan(app: FastAPI):
 # API docs only outside production
 docs = {} if APP_ENV == "dev" else {"docs_url": None, "redoc_url": None, "openapi_url": None}
 app = FastAPI(title="AzmoonRep API", version="0.2.0", lifespan=lifespan, **docs)
+errors.install(app)
+
+
+@app.middleware("http")
+async def security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    if request.url.path.startswith("/static/questions/"):
+        # figure files are named by content hash: safe to cache for a year
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    elif not request.url.path.startswith("/static"):
+        response.headers.setdefault("Cache-Control", "no-store")     # API answers are personal
+    return response
+
+
 app.middleware("http")(logging_setup.request_logger)
 
 BOOKS_DIR = os.path.join(os.path.dirname(__file__), "..", "static", "books")
