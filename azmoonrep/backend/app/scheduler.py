@@ -129,11 +129,14 @@ def key_point(concept_id: str) -> dict | None:
         return None
     return {"title": c["title"], "text": c["key_point"]}
 
+CALIBRATION_MIN_N = 20  # DESIGN §7: switch to empirical difficulty/time after >=20 responses
+
 # ---------------------------------------------------------------- option order (§11.7)
 
-POSITIONAL = re.compile(r"(همه|هیچ|گزینه|موارد|هر\s*دو|نمودار\s*[۱-۶1-6]|شکل\s*[۱-۶1-6])")
-# «گزینهٔ ۲»، «گزینه 2»، «گزینهٔ درست: ۲»
-OPTION_REF = re.compile(r"(گزینه(?:ٔ|ی|‌ی)?\s*(?:درست\s*[:：]?\s*)?)([۱-۶1-6])")
+POSITIONAL = re.compile(r"(همه|هیچ|گزینه|موارد|هر\s*دو|نمودار\s*[۱-۶1-6]|شکل\s*[۱-۶1-6]|الف\s*\)|ب\s*\)|پ\s*\)|ج\s*\)|د\s*\)|ت\s*\))")
+# «گزینهٔ ۲»، «گزینه‌های ۱ و ۳»، «گزینهٔ درست: ۲»، «گزینه (۲)»
+OPTION_REF_SINGLE = re.compile(r"(گزینه(?:ٔ|ی|‌ی)?\s*(?:درست\s*[:：]?\s*)?\(?)\s*([۱-۶1-6])(\)?)")
+OPTION_REF_LIST = re.compile(r"(گزینه(?:‌های|های)\s*)([۱-۶1-6](?:\s*(?:،|,|و)\s*[۱-۶1-6])+)")
 FA = "۰۱۲۳۴۵۶۷۸۹"
 
 
@@ -198,18 +201,27 @@ def to_display(original_opt, perm):
 
 
 def remap_solution(text: str | None, perm: list | None) -> str | None:
-    """«گزینهٔ ۲» in a solution refers to the original order: renumber for this student"""
+    """«گزینهٔ ۲» or «گزینه‌های ۱ و ۳» in a solution refers to the original order:
+    renumber for this student's shuffled display order."""
     if not text or not perm:
         return text
 
-    def repl(m):
-        n = int(m.group(2).translate(str.maketrans(FA, "0123456789")))
+    def _map_digit(d: str) -> str:
+        n = int(d.translate(str.maketrans(FA, "0123456789")))
         if not 1 <= n <= len(perm):
-            return m.group(0)
+            return d
         shown = to_display(n, perm)
-        digit = FA[shown] if m.group(2) in FA else str(shown)
-        return m.group(1) + digit
-    return OPTION_REF.sub(repl, text)
+        return FA[shown] if d in FA else str(shown)
+
+    def repl_list(m):
+        body = re.sub(r"[۱-۶1-6]", lambda dm: _map_digit(dm.group(0)), m.group(2))
+        return m.group(1) + body
+
+    def repl_single(m):
+        return m.group(1) + _map_digit(m.group(2)) + m.group(3)
+
+    text = OPTION_REF_LIST.sub(repl_list, text)
+    return OPTION_REF_SINGLE.sub(repl_single, text)
 
 # ---------------------------------------------------------------- daily queue (§5.2)
 
@@ -297,7 +309,14 @@ def build_daily_queue(student: dict, load: int | None = None, book_id: str | Non
             break
 
     review_pool = [(cid, "review") for cid in due_ids] + [(cid, "weak") for cid in weak_ids]
-    n_new = min(len(new_ids), load if not review_pool else max(2, round(load * 0.2)))
+    # Reserve ~20% for new concepts, but never starve due reviews on small loads (load>=2 -> >=1 review)
+    overdue_count = sum(1 for cid in due_ids if due_day(states[cid]) < today_s)
+    if not review_pool:
+        n_new = min(len(new_ids), load)
+    else:
+        min_new = max(1, round(load * 0.2)) if load <= 4 else max(2, round(load * 0.2))
+        max_for_new = max(0, load - max(1 if due_ids else 0, min(overdue_count, load)))
+        n_new = min(len(new_ids), min_new, max_for_new)
     n_review = load - n_new
 
     slots, in_queue, picked = [], set(), set(used_qids)
@@ -307,7 +326,7 @@ def build_daily_queue(student: dict, load: int | None = None, book_id: str | Non
         in_queue.add(cid); picked.add(q["_id"])
         slots.append({"concept_id": cid, "question_id": q["_id"], "kind": kind,
                       "scheduled": kind in ("review", "new"), "repeat": repeat,
-                      "overdue": kind == "review" and due_day(states[cid]) < today_s,
+                      "overdue": kind == "review" and cid in states and due_day(states[cid]) < today_s,
                       "perm": make_perm(q), "status": "pending"})
 
     # one slot per concept per day (§5.2 rule 5, tightened)
@@ -318,15 +337,18 @@ def build_daily_queue(student: dict, load: int | None = None, book_id: str | Non
         if q is None:
             continue
         if repeat:
-            # §5.3 step 4: family exhausted -> a not-yet-learned sibling in the same lesson
-            sib = _sibling_question(student_id, cid, lesson_of, states, in_queue | used_concepts,
-                                    picked, in_scope)
-            if sib:
-                scid, sq = sib
-                add(scid, "review" if scid in states else "new", sq, False)
-                continue
+            # Never skip an actually due/overdue review with a sibling swap — otherwise its due_day
+            # never advances and it becomes permanently stuck. Only weak reinforcement slots swap.
+            if kind == "weak":
+                sib = _sibling_question(student_id, cid, lesson_of, states, in_queue | used_concepts,
+                                        picked, in_scope)
+                if sib:
+                    scid, sq = sib
+                    add(scid, "review" if scid in states else "new", sq, False)
+                    continue
         add(cid, kind, q, repeat)
 
+    # Top up remaining capacity with new concepts if review_pool was smaller than n_review
     for cid in new_ids:
         if len(slots) >= load:
             break
@@ -335,6 +357,17 @@ def build_daily_queue(student: dict, load: int | None = None, book_id: str | Non
         q, repeat = pick_question(student_id, cid, exclude_ids=picked)
         if q is not None:
             add(cid, "new", q, repeat)
+
+    # If still under load (e.g. few new concepts), fill from remaining due/weak reviews
+    if len(slots) < load:
+        for cid, kind in review_pool:
+            if len(slots) >= load:
+                break
+            if cid in in_queue:
+                continue
+            q, repeat = pick_question(student_id, cid, exclude_ids=picked)
+            if q is not None:
+                add(cid, kind, q, repeat)
 
     # order: overdue reviews (shuffled), other reviews (shuffled), then new key points in
     # curriculum order: a new point may build on the one taught just before it
@@ -386,7 +419,9 @@ def pick_question(student_id, concept_id, exclude_ids=None):
         target = {0: 1, 1: 2, 2: 3, 3: 4}.get(level, 3)
         if (st or {}).get("streak", 0) == 0:
             target = max(1, target - 1)   # struggling student: easier variant
-        unseen.sort(key=lambda q: (abs(q.get("difficulty", 3) - target), random.random()))
+        unseen.sort(key=lambda q: (abs(effective_difficulty(q) - target),
+                                   0 if q.get("source", "bank") == "bank" else 1,
+                                   random.random()))
         return unseen[0], False
     # every question seen: the least recently seen one (front of the ring buffer)
     order = {qid: i for i, qid in enumerate((st or {}).get("seen_question_ids", []))}
@@ -402,11 +437,44 @@ def _has_key(q: dict) -> bool:
 # ---------------------------------------------------------------- grading
 
 
+def effective_difficulty(question: dict) -> int:
+    """empirical difficulty overrides heuristic once calibrated (DESIGN §7)"""
+    emp = question.get("empirical_difficulty")
+    if isinstance(emp, (int, float)) and 1 <= emp <= 5:
+        return int(round(emp))
+    return int(question.get("difficulty") or 3)
+
+
 def expected_time(question: dict) -> int:
+    emp_ms = question.get("median_time_ms")
+    if isinstance(emp_ms, (int, float)) and 5_000 <= emp_ms <= 300_000:
+        return int(emp_ms)
     if question.get("type") == "tashrihi":
         return 90_000
     return {1: 25_000, 2: 30_000, 3: 40_000, 4: 55_000, 5: 75_000}.get(
-        question.get("difficulty", 3), 40_000)
+        effective_difficulty(question), 40_000)
+
+
+def maybe_calibrate_question(question_id) -> dict | None:
+    """After >= CALIBRATION_MIN_N responses, compute empirical difficulty (1=easy..5=hard)
+    and median solve time (trimmed to sensible window) on the question document."""
+    resps = list(db.db.responses.find(
+        {"question_id": question_id}, {"correct": 1, "time_ms": 1}))
+    n = len(resps)
+    if n < CALIBRATION_MIN_N:
+        return None
+    correct_rate = sum(1 for r in resps if r.get("correct")) / n
+    # DESIGN §7: high correct_rate -> easier (1), low correct_rate -> harder (5)
+    emp_diff = max(1, min(5, 1 + round(4 * (1.0 - correct_rate))))
+    valid_times = sorted(r["time_ms"] for r in resps
+                         if isinstance(r.get("time_ms"), (int, float)) and 2_000 <= r["time_ms"] <= 300_000)
+    med_ms = valid_times[len(valid_times) // 2] if valid_times else None
+    upd = {"empirical_difficulty": emp_diff, "empirical_correct_rate": round(correct_rate, 3),
+           "empirical_n": n}
+    if med_ms is not None:
+        upd["median_time_ms"] = int(med_ms)
+    db.db.questions.update_one({"_id": question_id}, {"$set": upd})
+    return upd
 
 
 def grade(q: dict, selected_option):
@@ -467,6 +535,7 @@ def answer_slot(student: dict, session: dict, index: int, selected_option, time_
         # for the retention metric: was this a spaced check after a long interval?
         "prior_interval_days": st.get("prior_interval"), "schedule_applied": st.get("applied"),
         "context": "daily", "answered_at": clock.now_utc()})
+    maybe_calibrate_question(q["_id"])
 
     db.db.concept_state.update_one(
         {"student_id": student["_id"], "concept_id": slot["concept_id"]},
@@ -667,9 +736,12 @@ def answer_practice_slot(student, session, index, selected_option, time_ms):
         "concept_id": slot["concept_id"], "correct": correct,
         "time_ms": time_ms, "selected_option": original, "selected_display": selected_option,
         "context": "practice", "answered_at": clock.now_utc()})
+    maybe_calibrate_question(q["_id"])
     done = sum(1 for s in slots if s["status"] == "answered") + 1
     out = _feedback(q, perm, correct_opt, correct)
     out.update({"done": done, "total": len(slots)})
+    if not correct:
+        out["key_point"] = key_point(slot["concept_id"])
     return out
 
 # ---------------------------------------------------------------- today's plan (DESIGN §9.1)

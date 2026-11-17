@@ -52,6 +52,8 @@ def list_concepts(book_id: str | None = None, user: dict = Depends(auth.require_
     for c in db.db.concepts.find(q).sort("order_in_curriculum", 1):
         n = counts.get(c["concept_id"], {})
         out.append({"concept_id": c["concept_id"], "title": c["title"],
+                    "book_id": c.get("book_id"), "book_name": c.get("book_name"),
+                    "grade": c.get("grade"),
                     "chapter_title": c.get("chapter_title"),
                     "lesson_title": c.get("lesson_title"),
                     "questions": n.get("all", 0), "approved": n.get("approved", 0)})
@@ -118,12 +120,12 @@ def list_questions(status: str = "all", concept_id: str | None = None,
                    sort: str = "created",
                    skip: int = 0, limit: int = 50,
                    user: dict = Depends(auth.require_admin)):
-    """status: all | approved | pending | rejected | flagged ; sort: created | difficulty | served | correct_rate"""
+    """status: all | approved | pending | pending_verified | rejected | flagged ; sort: created | difficulty | served | correct_rate"""
     q: dict = {}
     if concept_id:
         q["concept_id"] = concept_id
     if chapter_id:
-        q["chapter_id"] = chapter_id
+        q["chapter_id"] = None if chapter_id == "__none" else chapter_id
     if search:
         import re as _re
         rx = {"$regex": _re.escape(search), "$options": "i"}
@@ -135,6 +137,10 @@ def list_questions(status: str = "all", concept_id: str | None = None,
         q["review_status"] = "rejected"
     elif status == "pending":
         q["review_status"] = {"$in": [None, "pending"]}
+    elif status == "pending_verified":
+        q["review_status"] = {"$in": [None, "pending"]}
+        q["verification.status"] = "verified"
+        q["needs_answer_verification"] = {"$ne": True}
     elif status == "flagged":
         q["needs_answer_verification"] = True
     total = db.db.questions.count_documents(q)
@@ -151,16 +157,22 @@ def list_questions(status: str = "all", concept_id: str | None = None,
         {"$group": {"_id": "$question_id",
                     "n": {"$sum": 1}, "c": {"$sum": {"$cond": ["$correct", 1, 0]}}}}])}
     items = []
+    concept_titles = {c["concept_id"]: c.get("title") for c in db.db.concepts.find(
+        {"concept_id": {"$in": list({d.get("concept_id") for d in docs if d.get("concept_id")})}},
+        {"concept_id": 1, "title": 1})}
     for d in docs:
         st = served.get(d["_id"], {})
         n, c = st.get("n", 0), st.get("c", 0)
         rate = round(c / n, 2) if n else None
         items.append({
             "public_id": d.get("public_id"), "concept_id": d.get("concept_id"),
+            "concept_title": concept_titles.get(d.get("concept_id")),
             "topic": d.get("topic"), "subtopic": d.get("subtopic"),
             "chapter_id": d.get("chapter_id"), "grade": d.get("grade"),
             "difficulty": d.get("difficulty"),
+            "empirical_difficulty": d.get("empirical_difficulty"),
             "review_status": d.get("review_status", "pending"),
+            "verification_status": (d.get("verification") or {}).get("status"),
             "answer_option": (d.get("answer") or {}).get("option"),
             "needs_answer_verification": d.get("needs_answer_verification", False),
             "has_figure": bool(d.get("figures") or d.get("option_figures")),

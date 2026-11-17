@@ -236,3 +236,37 @@ def test_legacy_state_without_due_day(fresh_db):
     assert scheduler.due_day(fresh_db.concept_state.find_one({"concept_id": "c1"})) == "2026-11-14"
     s = scheduler.build_daily_queue(student)
     assert any(sl["concept_id"] == "c1" and sl["kind"] == "review" for sl in s["slots"])
+
+def test_solution_option_list_remapping():
+    perm = [3, 1, 4, 2]       # display 1<-3, 2<-1, 3<-4, 4<-2
+    text = "گزینه‌های ۱ و ۳ نادرست‌اند و گزینهٔ 2 درست است."
+    out = scheduler.remap_solution(text, perm)
+    assert out == "گزینه‌های ۲ و ۱ نادرست‌اند و گزینهٔ 4 درست است."
+
+
+def test_due_review_not_starved_by_sibling_swap(fresh_db):
+    student = seed(fresh_db, per_concept=1, extra_pending=False)
+    # student saw c1_q0 yesterday and c1 is due today; c2 in same lesson L1 is unseen
+    fresh_db.concept_state.insert_one({
+        "student_id": student["_id"], "concept_id": "c1", "ease": 2.5, "interval_days": 1.0,
+        "streak": 1, "lapses": 0, "total_answers": 1, "total_correct": 1, "mastery_level": 1,
+        "due_day": "2026-11-14", "last_review_day": "2026-11-13",
+        "seen_question_ids": [fresh_db.questions.find_one({"public_id": "c1_q0"})["_id"]],
+    })
+    s = scheduler.build_daily_queue(student, load=2)
+    cids = [sl["concept_id"] for sl in s["slots"]]
+    assert "c1" in cids, "due concept must be served so its due_day can advance"
+
+
+def test_empirical_difficulty_and_time_calibration(fresh_db):
+    student = seed(fresh_db)
+    q = fresh_db.questions.find_one({"public_id": "c1_q0"})
+    for i in range(20):
+        fresh_db.responses.insert_one({
+            "student_id": student["_id"], "question_id": q["_id"], "concept_id": "c1",
+            "correct": i < 2, "time_ms": 62_000, "answered_at": clock.now_utc()})
+    cal = scheduler.maybe_calibrate_question(q["_id"])
+    assert cal["empirical_difficulty"] == 5 and cal["median_time_ms"] == 62_000
+    updated = fresh_db.questions.find_one({"_id": q["_id"]})
+    assert scheduler.effective_difficulty(updated) == 5
+    assert scheduler.expected_time(updated) == 62_000

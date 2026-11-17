@@ -8,13 +8,22 @@ router = APIRouter(prefix="/sessions", tags=["sessions"])
 
 def public_question(q: dict, perm: list | None = None) -> dict:
     """what the student sees: options in this slot's shuffled order, no answer"""
+    cid = q.get("concept_id")
+    c = db.db.concepts.find_one({"concept_id": cid},
+                                {"title": 1, "chapter_title": 1, "book_name": 1}) if cid else None
+    src = q.get("source_meta") or (q.get("source") if isinstance(q.get("source"), dict) else None)
     return {
         "question_id": q.get("public_id") or str(q["_id"]),
         "stem_md": q.get("stem_md"),
         "options": scheduler.display_options(q, perm),
         "type": q.get("type", "multiple_choice_4"),
+        "difficulty": scheduler.effective_difficulty(q),
         **scheduler.question_figures(q, perm),
-        "concept_id": q.get("concept_id"),
+        "concept_id": cid,
+        "concept_title": (c or {}).get("title"),
+        "chapter_title": (c or {}).get("chapter_title"),
+        "book_name": (c or {}).get("book_name"),
+        "exam_source": (src or {}).get("exam_label"),
     }
 
 def _fix(s):

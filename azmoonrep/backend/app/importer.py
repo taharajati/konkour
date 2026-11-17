@@ -253,11 +253,15 @@ def import_questions(questions_root: str) -> dict:
                     "answer": {"option": ans_opt},
                     "solution_md": solution,
                 }
+                raw_src = meta.get("source")
+                src_kind = (raw_src.get("kind") if isinstance(raw_src, dict) else raw_src) or "bank"
+                if src_kind not in ("bank", "ai_generated", "konkur"):
+                    src_kind = "bank"
                 doc = {
                     "public_id": public_id,
                     "grade": grade,
                     "topic": topic, "subtopic": sub,
-                    "book_id": (concept_doc or {}).get("book_id"),
+                    "book_id": (concept_doc or {}).get("book_id") or meta.get("book_id"),
                     "chapter_id": (concept_doc or {}).get("chapter_id"),
                     "type": meta.get("question_type", "multiple_choice_4"),
                     "verification": meta.get("verification"),
@@ -266,7 +270,8 @@ def import_questions(questions_root: str) -> dict:
                     "needs_answer_verification": conf == "low"
                                                  or meta.get("needs_answer_verification", False),
                     "answer_confidence": conf,
-                    "source": "bank",
+                    "source": src_kind,
+                    "source_meta": raw_src if isinstance(raw_src, dict) else None,
                     "storage_path": dest,
                     # private bank folder: scans are served to admins only, from here
                     "source_path": os.path.abspath(qpath),
@@ -280,7 +285,10 @@ def import_questions(questions_root: str) -> dict:
                 existing = db.db.questions.find_one({"public_id": public_id},
                                                     {"edited_at": 1})
                 if existing and existing.get("edited_at"):
-                    update = {"$set": doc, "$setOnInsert": {}}
+                    # the manager may have moved it to another concept: book/chapter follow that
+                    update = {"$set": {k: v for k, v in doc.items()
+                                       if k not in ("book_id", "chapter_id")},
+                              "$setOnInsert": {}}
                 else:
                     update = {"$set": {**doc, **content}, "$setOnInsert": {}}
                 update["$setOnInsert"].update({"review_status": "pending", "reviewed": False})
@@ -391,29 +399,26 @@ def _ensure_concept(concept_id, grade, book_name, chapter_title, topic, sub):
 
 def clean_solution(text: str | None, ans_opt) -> str:
     """student-facing solution: no meta-commentary about the source answer key,
-    and always ends with a concrete answer."""
+    no leftover question marks or editorial reminders, and always ends with one clear answer."""
     text = (text or "").strip()
-    # the bank's leading «**گزینهٔ درست: N**» line: the answer line is appended once below
-    text = re.sub(r"^\s*\**\s*گزینه(?:ٔ|ی)?\s*درست\s*[:：]\s*[۱-۶1-6]\s*\**\s*\n*", "", text)
-    # drop «طبق پاسخنامه ...» clauses (up to sentence end)
-    text = re.sub(r"[؛;.]?\s*\(?\s*طبق\s*پاسخنامه[^.؛!\n]*[.؛)!]?", "", text)
-    # «مطابق پاسخنامه ...» clauses
-    text = re.sub(r"[؛;.]?\s*مطابق\s*پاسخنامه[^.؛!\n]*[.؛)!]?", "", text)
-    # any parenthetical mentioning the answer key
-    text = re.sub(r"\s*\([^)]*پاسخنامه[^)]*\)", "", text)
-    # unverified/verify-reminders are manager-only flags
-    text = text.replace("**پاسخ تأیید نشده.**", "")
-    text = re.sub(r"\*?\*?پاسخ تأیید نشده\.\*?\*?", "", text)
-    text = re.sub(r"[^\n]*نیازمند تأیید[^\n]*", "", text)
-    text = re.sub(r"[^\n]*پاسخنامهٔ تشریحی[^.]*جستجو\s*شود[.؛]?", "", text)
-    text = re.sub(r"[^\n]*بازبینی تصویر گزینه‌هاست[.؛]?", "", text)
-    # confidence flags — manager-only info (e.g. «(اطمینان: high)»)
+    # drop leading «**گزینهٔ درست: N**» and standalone «حل:» headers
+    text = re.sub(r"^\s*\**\s*گزینه(?:ٔ|ی)?\s*درست\s*[:：]\s*[۱-۶1-6]\s*\**\s*(?:\([^)]*\))?\s*\n*", "", text)
+    text = re.sub(r"^\s*حل\s*[:：]\s*\n*", "", text)
+    # drop «طبق پاسخنامه ...» and «مطابق پاسخنامه ...» clauses
+    text = re.sub(r"[؛;.]?\s*\(?\s*(?:طبق|مطابق)\s*(?:پاسخنامه|پاسخ‌نامه|کتاب)[^.؛!\n]*[.؛)!]?", "", text)
+    text = re.sub(r"\s*\([^)]*(?:پاسخنامه|پاسخ‌نامه|تصویر مرجع|اسکن)[^)]*\)", "", text)
+    # unverified / editorial reminders are manager-only flags
+    text = re.sub(r"\*?\*?پاسخ تأیید نشده\.?\*?\*?", "", text)
+    text = re.sub(r"[^\n]*(?:نیازمند تأیید|تصویر مرجع|جستجو\s*شود|بازبینی تصویر|بررسی دقیق در تصویر)[^\n]*", "", text)
     text = re.sub(r"\s*\((?:اطمینان|تأیید|confidence)[^)]*\)", "", text)
-    text = re.sub(r"\s*\(\s*\)", "", text)      # leftover empty parens
-    text = re.sub(r"[ \t]+", " ", text).strip()
-    if ans_opt is not None and not text.endswith("پاسخ درست"):
-        if not re.search(r"پاسخ درست[:：]", text):
-            text = f"{text}\n\n**پاسخ درست: گزینهٔ {ans_opt}**".strip()
+    # strip trailing dangling «گزینهٔ درست» or «..» artifacts
+    text = re.sub(r"(?:؛|\.)?\s*گزینه(?:ٔ|ی)?\s*(?:صحیح|درست)\s*[:：]?\s*$", "", text)
+    text = re.sub(r"(?<!\.)\.\.(?!\.)", ".", text)
+    text = re.sub(r"\s*\(\s*\)", "", text)
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
+    if ans_opt is not None and not re.search(r"پاسخ درست[:：]", text):
+        text = f"{text}\n\n**پاسخ درست: گزینهٔ {ans_opt}**".strip()
     if not text:
         text = "حل این سؤال به‌زودی تکمیل می‌شود."
     return text
