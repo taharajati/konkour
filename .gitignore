@@ -25,3 +25,6 @@ azmoonrep/backend/static/questions/
 **/source_page.png
 **/question_shot.png
 design/identities.html
+
+# docker image bundle for offline server installs
+azmoon_images.tar.gz

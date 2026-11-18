@@ -24,9 +24,14 @@ docker network inspect "$NET" >/dev/null 2>&1 || docker network create "$NET"
 docker volume create azmoon_mongo >/dev/null
 docker volume create azmoon_figures >/dev/null
 
-echo "== build images (backend, frontend)"
-docker build -t azmoon_api:latest ./backend
-docker build -t azmoon_web:latest ./frontend
+if [ "${SKIP_BUILD:-0}" = "1" ]; then
+  echo "== images: using the ones already loaded (SKIP_BUILD=1; docker load -i azmoon_images.tar.gz)"
+  docker image inspect azmoon_api:latest azmoon_web:latest mongo:7 >/dev/null
+else
+  echo "== build images (backend, frontend)"
+  docker build -t azmoon_api:latest ./backend
+  docker build -t azmoon_web:latest ./frontend
+fi
 
 echo "== database (no published port: only the API can reach it)"
 if ! docker ps -a --format '{{.Names}}' | grep -qx azmoon_mongo; then
