@@ -25,6 +25,8 @@ MONGO_DB = os.getenv("MONGO_DB", "azmoonrep")
 APP_ENV = os.getenv("APP_ENV", "dev")          # dev | prod
 
 # phone login (OTP). SMS_PROVIDER: console (dev: code goes to the log) | kavenegar
+# OTP_ENABLED: phone login is on in dev and off in prod unless explicitly turned on
+OTP_ENABLED = os.getenv("OTP_ENABLED", "1" if APP_ENV == "dev" else "0") == "1"
 SMS_PROVIDER = os.getenv("SMS_PROVIDER", "console")
 SMS_API_KEY = os.getenv("SMS_API_KEY", "")
 SMS_TEMPLATE = os.getenv("SMS_TEMPLATE", "azmoonrep-otp")   # provider-side template name
@@ -64,6 +66,6 @@ STATIC_QUESTIONS_DIR = os.path.join(os.path.dirname(__file__), "..", "static", "
 
 DEFAULT_DAILY_LOAD = 20
 
-if APP_ENV != "dev" and SMS_PROVIDER == "console":
+if OTP_ENABLED and APP_ENV != "dev" and SMS_PROVIDER == "console":
     raise RuntimeError("SMS_PROVIDER=console prints login codes to the log; set a real "
                        "provider (e.g. kavenegar) when APP_ENV is not 'dev'")

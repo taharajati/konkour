@@ -28,3 +28,4 @@ design/identities.html
 
 # docker image bundle for offline server installs
 azmoon_images.tar.gz
+azmoon_app_images.tar.gz

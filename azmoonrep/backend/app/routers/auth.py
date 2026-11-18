@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from .. import auth, clock, db, ratelimit, scheduler, sms
-from ..config import (DEFAULT_DAILY_LOAD, JWT_SECRET, OTP_TTL_SECONDS,
+from ..config import (DEFAULT_DAILY_LOAD, JWT_SECRET, OTP_ENABLED, OTP_TTL_SECONDS,
                       PASSWORD_LOGIN_FOR_STUDENTS)
 from ..logging_setup import audit, client_ip
 
@@ -98,6 +98,8 @@ class OtpVerify(BaseModel):
 
 @router.post("/otp/request")
 def otp_request(body: OtpRequest, request: Request):
+    if not OTP_ENABLED:
+        raise HTTPException(404, "ورود با پیامک فعال نیست.")
     phone = normalize_phone(body.phone)
     ip = client_ip(request)
     ratelimit.hit("otp-phone-min", phone, limit=1, window=60,
@@ -121,6 +123,8 @@ def otp_request(body: OtpRequest, request: Request):
 
 @router.post("/otp/verify")
 def otp_verify(body: OtpVerify, request: Request):
+    if not OTP_ENABLED:
+        raise HTTPException(404, "ورود با پیامک فعال نیست.")
     phone = normalize_phone(body.phone)
     ratelimit.hit("otp-verify-ip", client_ip(request), limit=40, window=3600)
     code = body.code.translate(FA_DIGITS).strip()

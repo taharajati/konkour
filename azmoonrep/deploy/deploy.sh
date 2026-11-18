@@ -52,7 +52,7 @@ docker run -d --name azmoon_api --network "$NET" --network-alias api --restart u
   -e APP_ENV=prod -e TRUST_PROXY=1 -e LOG_LEVEL=INFO \
   -e MONGO_URL=mongodb://azmoon_mongo:27017 -e MONGO_USER="$MONGO_USER" -e MONGO_PASS="$MONGO_PASS" \
   -e MONGO_DB=azmoonrep -e JWT_SECRET="$JWT_SECRET" \
-  -e SMS_PROVIDER="${SMS_PROVIDER:-kavenegar}" -e SMS_API_KEY="${SMS_API_KEY:-}" \
+  -e OTP_ENABLED="${OTP_ENABLED:-0}" -e SMS_PROVIDER="${SMS_PROVIDER:-kavenegar}" -e SMS_API_KEY="${SMS_API_KEY:-}" \
   -e SMS_TEMPLATE="${SMS_TEMPLATE:-azmoonrep-otp}" \
   -e PASSWORD_LOGIN_FOR_STUDENTS="${PASSWORD_LOGIN_FOR_STUDENTS:-1}" \
   -e BOOKS_JSON="/data/main books/books_catalog.json" -e TAXONOMY_DIR=/data/taxonomy \

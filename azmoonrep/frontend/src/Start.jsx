@@ -7,7 +7,7 @@ import Markdown from './Markdown'
 import Login from './Login'
 
 // The landing page IS the first question (design/DESIGN.md §3): give first, ask later.
-// q (three questions) -> result + prefilled plan -> name -> phone -> code -> app.
+// q (three questions) -> result + prefilled plan -> name -> username + password -> app.
 const LOADS = [10, 20, 40]
 const KEY = 'azmoon_trial'
 const load = () => { try { return JSON.parse(sessionStorage.getItem(KEY) || 'null') } catch { return null } }
@@ -17,15 +17,14 @@ export default function Start({ onLoggedIn }) {
   const [trial, setTrial] = useState(saved?.trial || null)     // {token, grade, questions}
   const [answers, setAnswers] = useState(saved?.answers || []) // display option per question
   const [results, setResults] = useState(saved?.results || []) // true/false per question
-  const [step, setStep] = useState(saved?.step || 'loading')   // loading|q|result|name|phone|code|login
+  const [step, setStep] = useState(saved?.step || 'loading')   // loading|q|result|name|account|login
   const [selected, setSelected] = useState(null)
   const [feedback, setFeedback] = useState(null)
   const [grade, setGrade] = useState(saved?.grade || 9)
   const [daily, setDaily] = useState(saved?.daily || 20)
   const [name, setName] = useState(saved?.name || '')
-  const [phone, setPhone] = useState('')
-  const [code, setCode] = useState('')
-  const [wait, setWait] = useState(0)
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const i = answers.length - (feedback ? 1 : 0)
@@ -39,11 +38,6 @@ export default function Start({ onLoggedIn }) {
     if (step === 'loading' || step === 'login') return
     sessionStorage.setItem(KEY, JSON.stringify({ trial, answers, results, step: feedback ? 'q' : step, grade, daily, name }))
   }, [trial, answers, results, step, grade, daily, name, feedback])
-  useEffect(() => {
-    if (wait <= 0) return
-    const t = setTimeout(() => setWait(w => w - 1), 1000)
-    return () => clearTimeout(t)
-  }, [wait])
 
   async function run(fn) {
     if (busy) return
@@ -60,12 +54,9 @@ export default function Start({ onLoggedIn }) {
     setFeedback(null); setSelected(null)
     if (answers.length >= trial.questions.length) setStep('result')
   }
-  const sendCode = (e) => { e?.preventDefault(); run(async () => {
-    const r = await post('/auth/otp/request', { phone })
-    setPhone(r.phone); setCode(''); setWait(60); setStep('code')
-  }) }
-  const verify = (e) => { e.preventDefault(); run(async () => {
-    const r = await post('/auth/otp/verify', { phone, code })
+  const signup = (e) => { e.preventDefault(); run(async () => {
+    await post('/auth/register', { username: username.trim(), password, grade: Number(grade), display_name: name.trim() })
+    const r = await post('/auth/login', { username: username.trim(), password })
     setToken(r.access_token)
     await post('/trial/claim', { token: trial?.token || null, answers, grade: Number(grade),
                                  daily_load: daily, display_name: name })
@@ -151,7 +142,7 @@ export default function Start({ onLoggedIn }) {
   )
 
   if (step === 'name') return (
-    <form className="st" onSubmit={e => { e.preventDefault(); if (name.trim()) setStep('phone') }}>
+    <form className="st" onSubmit={e => { e.preventDefault(); if (name.trim()) setStep('account') }}>
       {top}
       <h1>اسمت چیست؟</h1>
       <label htmlFor="st-name" className="st-sub">فقط برای اینکه بدانیم چه صدایت کنیم.</label>
@@ -160,30 +151,18 @@ export default function Start({ onLoggedIn }) {
     </form>
   )
 
-  if (step === 'phone') return (
-    <form className="st" onSubmit={sendCode}>
+  return (
+    <form className="st" onSubmit={signup}>
       {top}
       <h1>{name.trim()}، برنامه‌ات را کجا نگه داریم؟</h1>
-      <label htmlFor="st-phone" className="st-sub">شمارهٔ موبایلت را بده تا برنامه و جواب‌هایت گم نشود. یک کد برایت می‌فرستیم.</label>
-      <input id="st-phone" className="st-field" dir="ltr" inputMode="tel" autoComplete="tel" autoFocus placeholder="09121234567" value={phone} onChange={e => setPhone(e.target.value)} />
+      <label htmlFor="st-user" className="st-sub">یک نام کاربری و رمز انتخاب کن تا برنامه و جواب‌هایت گم نشود.</label>
+      <input id="st-user" className="st-field" dir="ltr" autoComplete="username" autoCapitalize="none" autoFocus
+             placeholder="نام کاربری (انگلیسی)" value={username} onChange={e => setUsername(e.target.value)} />
+      <input id="st-pass" className="st-field" dir="ltr" type="password" autoComplete="new-password"
+             placeholder="رمز عبور (دست‌کم ۸ کاراکتر)" value={password} onChange={e => setPassword(e.target.value)} />
       {error && <p className="error" role="alert">{error}</p>}
-      <button className="primary pk-cta" disabled={busy || !phone.trim()}>ارسال کد</button>
-      <button type="button" className="link-btn" onClick={() => setStep('name')}><Icon name="arrow" size={16} className="back" /> برگشت</button>
-    </form>
-  )
-
-  return (
-    <form className="st" onSubmit={verify}>
-      {top}
-      <h1>کد را وارد کن</h1>
-      <label htmlFor="st-code" className="st-sub">کد ۵ رقمی به <span dir="ltr">{phone}</span> پیامک شد.</label>
-      <input id="st-code" className="st-field otp-input" dir="ltr" inputMode="numeric" autoComplete="one-time-code" autoFocus maxLength={8} value={code} onChange={e => setCode(e.target.value)} />
-      {error && <p className="error" role="alert">{error}</p>}
-      <button className="primary pk-cta" disabled={busy || code.trim().length < 5}>ذخیرهٔ برنامه</button>
-      <div className="login-links">
-        <button type="button" className="link-btn" disabled={wait > 0 || busy} onClick={sendCode}>{wait > 0 ? `ارسال دوباره تا ${fa(wait)} ثانیهٔ دیگر` : 'ارسال دوبارهٔ کد'}</button>
-        <button type="button" className="link-btn" onClick={() => { setStep('phone'); setError('') }}>تغییر شماره</button>
-      </div>
+      <button className="primary pk-cta" disabled={busy || !username.trim() || password.length < 8}>ذخیرهٔ برنامه</button>
+      <button type="button" className="link-btn" onClick={() => { setStep('name'); setError('') }}><Icon name="arrow" size={16} className="back" /> برگشت</button>
     </form>
   )
 }
