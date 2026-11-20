@@ -668,7 +668,7 @@ def answer_placement_slot(student, session, index, selected_option, time_ms):
         raise ValueError("slot already answered")
 
     if placed:
-        interval, streak = (7.0, 2) if placed == "learned" else (3.0, 1)
+        interval, streak = (3.0, 2) if placed == "learned" else (3.0, 1)   # see place()
         due = clock.today() + dt.timedelta(days=int(interval))
         st = {"ease": 2.5, "interval_days": interval, "streak": streak, "lapses": 0,
               "total_answers": 1, "total_correct": 1, "due_day": due.isoformat(),
@@ -829,6 +829,7 @@ def plan_summary(student: dict, session: dict) -> dict:
             "remediation_count": kinds.get("remediation", 0),
             "est_minutes": max(1, round(pending_ms / 60000)) if pending_ms else 0,
             "missed_yesterday": missed_yesterday,
+            "streak_days": student_stats(sid)["streak_days"],
             "week": week}
 
 # ---------------------------------------------------------------- stats

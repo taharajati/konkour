@@ -17,7 +17,9 @@ export default function Today({ user, onStartSession, onOpenPath }) {
     <header className="pk-top">
       <span>{new Date().toLocaleDateString('fa-IR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
       <span className="who">
+        {plan?.streak_days >= 2 && <span className="pk-streak num" title="روزهای پیاپی با تمرین">{fa(plan.streak_days)} روز پیاپی</span>}
         {toExam !== null && toExam >= 0 && <span className="num">{fa(toExam)} روز تا آزمون</span>}
+        {toExam === null && <a className="pk-examlink" href="#/settings">تاریخ آزمون را بگذار</a>}
         <a className="pk-avatar" href="#/settings" aria-label="تنظیمات">{(user.display_name || '؟').slice(0, 1)}</a>
       </span>
     </header>

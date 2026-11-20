@@ -69,11 +69,11 @@ def test_placement_credit_and_no_penalty(fresh_db):
     fresh_db.questions.update_many({"concept_id": "c1"}, {"$set": {"difficulty": 4}})
     p = scheduler.build_placement_session(student, "B_ch1")
     get = lambda: fresh_db.placement_sessions.find_one({})
-    # c1: hard question right and quick -> learned, first check in a week
+    # c1: hard question right and quick -> placed as learned, still confirmed after 3 days
     out = scheduler.answer_placement_slot(student, get(), 0, _right(fresh_db, p["slots"][0]), 5000)
     assert out["placed"] == "learned"
     st = fresh_db.concept_state.find_one({"concept_id": "c1"})
-    assert st["mastery_level"] == 2 and st["due_day"] == "2026-11-21"
+    assert st["streak"] == 2 and st["mastery_level"] == 1 and st["due_day"] == "2026-11-17", "3-day confirmation first"
     assert "answers_to_learned" not in st, "placement credit is not counted as taught"
     # c2: medium question right -> learning, back in 3 days
     out = scheduler.answer_placement_slot(student, get(), 1, _right(fresh_db, p["slots"][1]), 5000)

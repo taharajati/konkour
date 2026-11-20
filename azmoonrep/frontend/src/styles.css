@@ -842,3 +842,17 @@ button.option:hover:not(:disabled) { border-color: var(--text); background: var(
 .lightbox-close { position: absolute; top: 12px; inset-inline-end: 12px; width: 40px; height: 40px; border-radius: 50%;
                   background: #fff; color: #111; border: none; display: grid; place-items: center; padding: 0; }
 .lightbox-hint { color: #fff; font-size: 12.5px; margin: 10px 0 0; opacity: .8; }
+
+/* ---- phone ergonomics (review round 2) ---- */
+.pk-streak { font-weight: 700; color: var(--accent, #0f8a5f); margin-inline-end: 10px; }
+.pk-examlink { font-size: 13px; color: var(--muted); margin-inline-end: 10px; text-decoration: underline; }
+/* the main action stays reachable without scrolling past a long question */
+.session .answer-actions, .session .feedback > .primary.wide {
+  position: sticky; inset-block-end: 0; padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
+  background: var(--card, #fff); z-index: 5;
+}
+/* touch targets of at least 44px */
+.answer-actions .ghost, .session button.ghost, .link-btn, .opt-zoom, .fig-zoom { min-height: 44px; min-width: 44px; }
+.opt-zoom, .fig-zoom { width: 44px; height: 44px; }
+/* keyboard hints mean nothing on a phone */
+@media (hover: none) { .kbd-hint, .kbd-help { display: none; } }
