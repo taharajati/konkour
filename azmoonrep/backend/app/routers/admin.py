@@ -189,6 +189,14 @@ def bulk_review(body: BulkReviewBody, user: dict = Depends(auth.require_admin)):
         raise HTTPException(422, "no questions selected")
     if not body.approved and not (body.note and body.note.strip()):
         raise HTTPException(422, "bulk rejection requires a note")
+    if body.approved:
+        flagged = [d["public_id"] for d in db.db.questions.find(
+            {"public_id": {"$in": body.public_ids}, "needs_answer_verification": True},
+            {"public_id": 1})]
+        if flagged:
+            raise HTTPException(
+                422, "این سؤال‌ها کلیدِ تأییدنشده دارند و گروهی تأیید نمی‌شوند؛ تک‌تک با اسکن مقایسه کن: "
+                     + ", ".join(flagged[:10]))
     now = clock.now_utc()
     db.db.questions.update_many(
         {"public_id": {"$in": body.public_ids}},

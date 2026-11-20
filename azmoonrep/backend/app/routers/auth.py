@@ -5,6 +5,7 @@ import re
 import secrets
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from pymongo.errors import DuplicateKeyError
 from pydantic import BaseModel, Field
 
 from .. import auth, clock, db, ratelimit, scheduler, sms
@@ -33,6 +34,7 @@ def register(body: Register, request: Request):
     if not PASSWORD_LOGIN_FOR_STUDENTS:
         raise HTTPException(403, "ثبت‌نام فقط با شمارهٔ موبایل ممکن است.")
     ratelimit.hit("register-ip", client_ip(request), limit=10, window=3600)
+    body.username = body.username.strip().lower()
     if not USERNAME_RE.match(body.username):
         raise HTTPException(422, "نام کاربری باید ۳ تا ۳۲ حرف انگلیسی، عدد یا _ . - باشد.")
     if len(body.password) < MIN_PASSWORD:
@@ -45,7 +47,10 @@ def register(body: Register, request: Request):
            "grade": body.grade,
            "display_name": (body.display_name or body.username).strip()[:40],
            "created_at": clock.now_utc()}
-    res = db.db.users.insert_one(doc)
+    try:
+        res = db.db.users.insert_one(doc)
+    except DuplicateKeyError:                      # two sign-ups with the same name at once
+        raise HTTPException(409, "این نام کاربری قبلاً گرفته شده است.")
     return {"id": str(res.inserted_id), "username": body.username, "role": "student"}
 
 LOGIN_WINDOW = 900
@@ -53,16 +58,25 @@ LOGIN_WINDOW = 900
 @router.post("/login")
 def login(body: Credentials, request: Request):
     ip = client_ip(request)
-    ratelimit.hit("login-ip", ip, limit=30, window=LOGIN_WINDOW)
-    # per account too: stops slow guessing of one password from many addresses
-    ratelimit.hit("login-user", body.username.lower(), limit=10, window=LOGIN_WINDOW)
-    user = db.db.users.find_one({"username": body.username})
-    if not user or not user.get("password_hash") \
-            or not auth.verify_password(body.password, user["password_hash"]):
+    name = body.username.strip().lower()
+    ratelimit.hit("login-ip", ip, limit=120, window=LOGIN_WINDOW)
+    # per account: only FAILED attempts count, so the owner's own good logins never add up
+    # and a stranger needs 10 wrong guesses (not just traffic) to slow down guessing
+    ratelimit.blocked("login-user", name, limit=10, window=LOGIN_WINDOW)
+    user = db.db.users.find_one({"username": name}) or db.db.users.find_one({"username": body.username})
+    if not user or not user.get("password_hash"):
+        auth.burn_time()
+        ratelimit.fail("login-user", name, LOGIN_WINDOW)
         raise HTTPException(401, "نام کاربری یا رمز عبور اشتباه است.")
+    if not auth.verify_password(body.password, user["password_hash"]):
+        ratelimit.fail("login-user", name, LOGIN_WINDOW)
+        raise HTTPException(401, "نام کاربری یا رمز عبور اشتباه است.")
+    if auth.needs_rehash(user["password_hash"]):
+        db.db.users.update_one({"_id": user["_id"]},
+                               {"$set": {"password_hash": auth.hash_password(body.password)}})
     if user.get("role") != "admin" and not PASSWORD_LOGIN_FOR_STUDENTS:
         raise HTTPException(403, "ورود دانش‌آموزان فقط با شمارهٔ موبایل است.")
-    ratelimit.reset("login-user", body.username.lower(), LOGIN_WINDOW)
+    ratelimit.reset("login-user", name, LOGIN_WINDOW)
     if user.get("role") == "admin":
         audit(user["username"], "admin_login", detail=ip)
     return {"access_token": auth.make_token(user), "role": user.get("role", "student"),

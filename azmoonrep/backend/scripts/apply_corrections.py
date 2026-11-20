@@ -9,6 +9,8 @@ derived by arithmetic or definition are set to approved; anything that depends o
 or whose scan I could not read fully, goes to "pending" with a note for the manager.
 The history of each question records who changed what.
 """
+import json
+import os
 import sys
 from app import clock, db
 
@@ -224,6 +226,53 @@ REJECT = {
 }
 
 
+def bank_dirs(root: str) -> dict:
+    """public id (folder name) -> folder path, for every question folder under root"""
+    out = {}
+    for dirpath, _dirs, files in os.walk(root):
+        if "meta.json" in files:
+            out[os.path.basename(dirpath)] = dirpath
+    return out
+
+
+def write_files(root: str, write: bool):
+    """The files are the source of truth: a fresh database imports from them, so the
+    corrections must live there too (a re-import would otherwise bring the errors back)."""
+    folders = bank_dirs(root)
+    done = 0
+    for pid, c in C.items():
+        path = folders.get(pid)
+        if not path:
+            print("no folder for", pid)
+            continue
+        meta_file = os.path.join(path, "meta.json")
+        meta = json.load(open(meta_file, encoding="utf-8"))
+        n = "".join(ch for ch in pid.rsplit("_", 1)[-1] if ch.isdigit()).lstrip("0") or "0"
+        opts = "\n\n".join(f"{i}) {o}" for i, o in enumerate(c["options"], 1))
+        qmd = f"# سؤال {n}\n\n{c['stem']}\n\n{opts}\n"
+        meta.update({"options": c["options"], "answer_option": c["answer"],
+                     "answer_confidence": "high",
+                     "needs_answer_verification": c["status"] != "approved",
+                     "verification": {"status": "verified" if c["status"] == "approved" else "needs_fix",
+                                      "key_option": c["answer"], "solver_option": c["answer"],
+                                      "notes": ["corrected from the scan, see scripts/apply_corrections.py"]}})
+        print(f"{pid}: files {'written' if write else 'would be written'}")
+        if write:
+            open(os.path.join(path, "question.md"), "w", encoding="utf-8", newline="\n").write(qmd)
+            open(os.path.join(path, "answer.md"), "w", encoding="utf-8", newline="\n").write(c["solution"] + "\n")
+            json.dump(meta, open(meta_file, "w", encoding="utf-8", newline="\n"), ensure_ascii=False, indent=2)
+        done += 1
+    for pid, note in HOLD.items():
+        path = folders.get(pid)
+        if path and write:
+            meta_file = os.path.join(path, "meta.json")
+            meta = json.load(open(meta_file, encoding="utf-8"))
+            meta["needs_answer_verification"] = True
+            meta["audit_note"] = note
+            json.dump(meta, open(meta_file, "w", encoding="utf-8", newline="\n"), ensure_ascii=False, indent=2)
+    print(f"{done} question folders", "updated" if write else "checked (dry run)")
+
+
 def main(write: bool):
     now = clock.now_utc()
     counts = {"approved": 0, "pending": 0, "rejected": 0, "missing": 0}
@@ -270,4 +319,8 @@ def main(write: bool):
 
 
 if __name__ == "__main__":
-    main("--write" in sys.argv)
+    # python -m scripts.apply_corrections --files <question_bank dir> [--write]
+    if "--files" in sys.argv:
+        write_files(sys.argv[sys.argv.index("--files") + 1], "--write" in sys.argv)
+    else:
+        main("--write" in sys.argv)

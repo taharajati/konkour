@@ -10,17 +10,35 @@ from .config import JWT_SECRET, JWT_EXPIRE_HOURS
 
 bearer = HTTPBearer(auto_error=False)
 
+PBKDF2_ITERATIONS = int(os.getenv("PBKDF2_ITERATIONS", "600000"))     # OWASP 2023; older accounts keep 100k until their next login
+
+def _pbkdf2(password: str, salt: str, iterations: int) -> str:
+    return hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), iterations).hex()
+
 def hash_password(password: str, salt: str | None = None) -> str:
+    """new format: pbkdf2$<iterations>$<salt>$<hash>"""
     salt = salt or os.urandom(16).hex()
-    h = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 100_000).hex()
-    return f"{salt}${h}"
+    return f"pbkdf2${PBKDF2_ITERATIONS}${salt}${_pbkdf2(password, salt, PBKDF2_ITERATIONS)}"
 
 def verify_password(password: str, stored: str) -> bool:
+    parts = stored.split("$")
     try:
-        salt, _ = stored.split("$", 1)
-    except ValueError:
-        return False
-    return hmac.compare_digest(hash_password(password, salt), stored)
+        if parts[0] == "pbkdf2" and len(parts) == 4:
+            return hmac.compare_digest(_pbkdf2(password, parts[2], int(parts[1])), parts[3])
+        if len(parts) == 2:                    # legacy: salt$hash, 100k iterations
+            return hmac.compare_digest(_pbkdf2(password, parts[0], 100_000), parts[1])
+    except (ValueError, TypeError):
+        pass
+    return False
+
+def needs_rehash(stored: str) -> bool:
+    return not stored.startswith(f"pbkdf2${PBKDF2_ITERATIONS}$")
+
+_DUMMY_HASH = hash_password("not-a-real-password", "0" * 32)
+
+def burn_time():
+    """same work for unknown usernames, so response time does not reveal which exist"""
+    verify_password("x", _DUMMY_HASH)
 
 def make_token(user: dict) -> str:
     payload = {

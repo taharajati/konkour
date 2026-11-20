@@ -413,7 +413,12 @@ def pick_question(student_id, concept_id, exclude_ids=None):
           if q["_id"] not in exclude and _has_key(q)]
     if not qs:
         return None, False
-    unseen = [q for q in qs if q["_id"] not in seen]
+    # questions already answered in free practice have shown their key: prefer fresh ones
+    practiced = {r["question_id"] for r in db.db.responses.find(
+        {"student_id": student_id, "concept_id": concept_id, "context": "practice"},
+        {"question_id": 1})}
+    unseen = [q for q in qs if q["_id"] not in seen and q["_id"] not in practiced] \
+        or [q for q in qs if q["_id"] not in seen]
     if unseen:
         level = (st or {}).get("mastery_level", 0)
         target = {0: 1, 1: 2, 2: 3, 3: 4}.get(level, 3)
@@ -687,7 +692,12 @@ def build_practice_session(student_id, concept_ids, count=10, question_ids=None,
         qs = [q for q in last_wrong_questions(student_id, limit=count)
               if q.get("review_status") == "approved"]
     elif question_ids:
-        qs = list(db.db.questions.find({"public_id": {"$in": question_ids}, **SERVABLE}))
+        # only questions this student has already answered: asking for arbitrary ids would
+        # show the answer key before the question comes up in the daily plan
+        answered = {r["question_id"] for r in db.db.responses.find(
+            {"student_id": student_id}, {"question_id": 1})}
+        qs = [q for q in db.db.questions.find({"public_id": {"$in": question_ids}, **SERVABLE})
+              if q["_id"] in answered]
     elif concept_ids:
         qs = list(db.db.questions.find({"concept_id": {"$in": concept_ids}, **SERVABLE}))
     else:
@@ -723,6 +733,7 @@ def answer_practice_slot(student, session, index, selected_option, time_ms):
     perm = slot.get("perm")
     original = to_original(selected_option, perm)
     correct_opt, correct = grade(q, original)
+    time_ms = max(0, min(int(time_ms or 0), 600_000))
 
     claimed = db.db.practice_sessions.update_one(
         {"_id": session["_id"], f"slots.{index}.status": "pending"},

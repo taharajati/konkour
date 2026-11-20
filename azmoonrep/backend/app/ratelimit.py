@@ -30,6 +30,31 @@ def hit(name: str, key: str, limit: int, window: int, message: str | None = None
     return n
 
 
+def _doc_id(name, key, window):
+    epoch = clock.now_utc().timestamp()
+    return f"{name}:{key}:{math.floor(epoch / window) * window}", epoch
+
+
+def blocked(name: str, key: str, limit: int, window: int, message: str | None = None):
+    """raise 429 when this window already holds `limit` recorded failures (does not count)"""
+    doc_id, epoch = _doc_id(name, key, window)
+    n = (db.db.rate_limits.find_one({"_id": doc_id}) or {}).get("n", 0)
+    if n >= limit:
+        retry = int(math.floor(epoch / window) * window + window - epoch) + 1
+        raise HTTPException(429, message or "تلاش‌های ناموفق زیاد بود؛ کمی بعد دوباره امتحان کن.",
+                            headers={"Retry-After": str(retry)})
+
+
+def fail(name: str, key: str, window: int):
+    """record one failure in the current window"""
+    doc_id, _ = _doc_id(name, key, window)
+    now = clock.now_utc()
+    db.db.rate_limits.update_one(
+        {"_id": doc_id},
+        {"$inc": {"n": 1}, "$setOnInsert": {"expires_at": now + dt.timedelta(seconds=window + 60)}},
+        upsert=True)
+
+
 def reset(name: str, key: str, window: int):
     """clear the current window (e.g. after a successful login)"""
     epoch = clock.now_utc().timestamp()

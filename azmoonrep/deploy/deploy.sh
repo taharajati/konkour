@@ -18,6 +18,8 @@ set -a; . ./.env; set +a
 WEB_BIND="${WEB_BIND:-127.0.0.1}"       # 0.0.0.0 to publish without a reverse proxy
 WEB_PORT="${WEB_PORT:-8081}"            # 3000, 3001, 5432, 9091 belong to Foroshgram
 NET=azmoon_net
+# the box is shared: cap memory and keep container logs from filling the disk
+LOGOPTS="--log-opt max-size=10m --log-opt max-file=3"
 
 echo "== network and volumes"
 docker network inspect "$NET" >/dev/null 2>&1 || docker network create "$NET"
@@ -36,15 +38,21 @@ fi
 echo "== database (no published port: only the API can reach it)"
 if ! docker ps -a --format '{{.Names}}' | grep -qx azmoon_mongo; then
   docker run -d --name azmoon_mongo --network "$NET" --restart unless-stopped \
+    --memory 512m $LOGOPTS \
     -v azmoon_mongo:/data/db \
     -e MONGO_INITDB_ROOT_USERNAME="$MONGO_USER" -e MONGO_INITDB_ROOT_PASSWORD="$MONGO_PASS" \
-    mongo:7
-  sleep 8
+    mongo:7 --wiredTigerCacheSizeGB 0.25
 fi
+echo "== wait for the database"
+for i in $(seq 1 30); do
+  docker exec azmoon_mongo mongosh --quiet --eval 'db.adminCommand({ping:1}).ok' >/dev/null 2>&1 && break
+  sleep 2
+done
 
 echo "== api"
 docker rm -f azmoon_api >/dev/null 2>&1 || true
 docker run -d --name azmoon_api --network "$NET" --network-alias api --restart unless-stopped \
+  --memory 400m $LOGOPTS \
   -v azmoon_figures:/app/static/questions \
   -v "$WORKSPACE/question_bank":/data/question_bank:ro \
   -v "$WORKSPACE/taxonomy":/data/taxonomy:ro \
@@ -57,11 +65,13 @@ docker run -d --name azmoon_api --network "$NET" --network-alias api --restart u
   -e PASSWORD_LOGIN_FOR_STUDENTS="${PASSWORD_LOGIN_FOR_STUDENTS:-1}" \
   -e BOOKS_JSON="/data/main books/books_catalog.json" -e TAXONOMY_DIR=/data/taxonomy \
   -e QUESTIONS_ROOT=/data/question_bank \
-  azmoon_api:latest
+  azmoon_api:latest \
+  uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --no-access-log
 
 echo "== web"
 docker rm -f azmoon_web >/dev/null 2>&1 || true
 docker run -d --name azmoon_web --network "$NET" --restart unless-stopped \
+  --memory 64m $LOGOPTS \
   -p "$WEB_BIND:$WEB_PORT:80" azmoon_web:latest
 
 echo "== wait for the API"
@@ -80,4 +90,5 @@ docker exec azmoon_api python -m scripts.import_data
 
 echo
 echo "Done. Web: http://$WEB_BIND:$WEB_PORT  (put the server's nginx/TLS in front for a public domain)"
+echo "Backup (run once a day, see deploy/backup.sh):  crontab: 30 3 * * * bash $WORKSPACE/azmoonrep/deploy/backup.sh"
 echo "Logs:  docker logs -f azmoon_api      Status: docker ps --filter name=azmoon"

@@ -6,6 +6,7 @@ import sys
 import mongomock
 import pytest
 
+os.environ.setdefault("PBKDF2_ITERATIONS", "2000")   # fast hashes in tests
 os.environ.setdefault("JWT_SECRET", "test-secret-" + "x" * 40)
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
