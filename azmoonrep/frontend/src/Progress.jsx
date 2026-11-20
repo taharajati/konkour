@@ -1,119 +1,112 @@
 import React, { useEffect, useState } from 'react'
-import { get, post } from './api'
-import { fa, pct, STATUS, MASTERY } from './ui'
+import { get } from './api'
+import { fa, pct, jalali } from './ui'
+import Icon from './Icons'
+import Mascot from './Mascot'
 
-// DESIGN §9.5: quiet secondary screen. Books with progress, the wrong-answers notebook,
-// free practice, and per-chapter mastery. Nothing here competes with «امروز».
-export default function Progress({ onSelectBook, onStartWrong, onFreePractice }) {
-  const [books, setBooks] = useState(null)
-  const [stats, setStats] = useState(null)
-  const [chapters, setChapters] = useState(null)
-  const [error, setError] = useState('')
+const WEEKDAY_FA = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج']   // Jalali week starts on Saturday
 
-  const load = () => {
-    setError('')
-    Promise.all([get('/me/books'), get('/auth/me/stats'), get('/curriculum/progress')])
-      .then(([b, s, c]) => { setBooks(b); setStats(s); setChapters(c) })
-      .catch(e => setError(e.message))
-  }
-  useEffect(load, [])
+function level(n) { return n === 0 ? 0 : n < 6 ? 1 : n < 16 ? 2 : 3 }
 
-  async function startWrong() {
-    try {
-      await post('/sessions/practice', { wrong_only: true, count: 10 })
-      onStartWrong()
-    } catch (e) { setError(e.message) }
-  }
-
-  if (error) return <div className="page"><div className="card"><p className="error">{error}</p><button onClick={load}>دوباره امتحان کن</button></div></div>
-  if (!books) return <div className="page"><div className="card skeleton" style={{ height: 220 }} /></div>
-
+// 35 days as rows of 7, Saturday first, so a column is always the same weekday
+function Heatmap({ days }) {
+  const first = new Date(days[0].date + 'T12:00:00').getDay()       // Sat = 6
+  const pad = (first + 1) % 7
+  const cells = [...Array(pad).fill(null), ...days]
   return (
-    <div className="page">
-      <header className="topbar"><h1 className="page-title">پیشرفت</h1></header>
-
-      {stats && (
-        <div className="stat-row">
-          <Stat n={pct(stats.accuracy)} label="دقت کل" />
-          <Stat n={fa(stats.week_answered)} label="سؤال این هفته" />
-          <Stat n={pct(stats.week_accuracy)} label="دقت این هفته" />
-        </div>
-      )}
-
-      <h2 className="section-title">کتاب‌های برنامهٔ تو</h2>
-      <div className="book-progress-grid">
-        {books.map(b => <BookCard key={b.book_id} b={b} onSelect={() => onSelectBook(b)} />)}
-        {!books.length && <p className="muted">هنوز کتابی انتخاب نکرده‌ای. از «تنظیمات ← برنامهٔ مطالعه» انتخاب کن.</p>}
-      </div>
-
-      {stats && stats.wrong_count > 0 && (
-        <div className="card wrong-card">
-          <h2 className="section-title">دفترچهٔ اشتباهات</h2>
-          <p className="muted">{fa(stats.wrong_count)} سؤال را آخرین بار اشتباه جواب دادی. تمرین دوباره‌شان روی برنامهٔ مرور اثری ندارد.</p>
-          <button className="wide" onClick={startWrong}>مرور اشتباهات</button>
-        </div>
-      )}
-
-      <div className="card">
-        <h2 className="section-title">تمرین آزاد</h2>
-        <p className="muted">خودت مبحث انتخاب کن و تمرین کن. روی برنامهٔ مرور اثری ندارد.</p>
-        <button className="wide" onClick={onFreePractice}>انتخاب مبحث و تمرین</button>
-      </div>
-
-      {chapters && chapters.length > 0 && (
-        <>
-          <h2 className="section-title">نکته‌ها، فصل به فصل</h2>
-          {chapters.map(ch => (
-            <details key={ch.book + ch.chapter} className="card chapter-mastery">
-              <summary>
-                <b>{ch.book || 'بدون کتاب'} · {ch.chapter || '—'}</b>
-                <span className="mastery-pill" style={{ background: MASTERY[Math.round(ch.mastery_avg)].color }}>
-                  {MASTERY[Math.round(ch.mastery_avg)].fa}
-                </span>
-              </summary>
-              {ch.concepts.map(c => (
-                <div key={c.concept_id} className="concept-line">
-                  <span className="concept-title">{c.title}</span>
-                  <span className="dot-group" aria-label={MASTERY[c.mastery].fa}>
-                    {[0, 1, 2, 3].map(l => (
-                      <span key={l} className="lvl-dot" style={{ background: l <= c.mastery ? MASTERY[l].color : 'var(--border)' }} />
-                    ))}
-                  </span>
-                  <span className="muted">{MASTERY[c.mastery].fa}</span>
-                </div>
-              ))}
-            </details>
-          ))}
-        </>
-      )}
+    <div className="hm" role="img" aria-label="فعالیت ۵ هفتهٔ اخیر">
+      {WEEKDAY_FA.map(w => <span key={w} className="hm-wd">{w}</span>)}
+      {cells.map((d, i) => d
+        ? <span key={d.date} className={`hm-c l${level(d.answered)}`}
+                title={`${jalali(d.date)}: ${fa(d.answered)} سؤال`} />
+        : <span key={'p' + i} />)}
     </div>
   )
 }
 
-function Stat({ n, label }) {
-  return <div className="stat-chip"><span className="stat-num">{n}</span><span className="stat-label">{label}</span></div>
-}
+// «پیشرفت»: where the student stands, what to fix, what comes tomorrow
+export default function Progress({ onStartWrong }) {
+  const [p, setP] = useState(null)
+  const [wrong, setWrong] = useState(0)
+  const [error, setError] = useState('')
+  const load = () => {
+    setError('')
+    Promise.all([get('/auth/me/progress'), get('/auth/me/stats')])
+      .then(([pr, st]) => { setP(pr); setWrong(st.wrong_count || 0) })
+      .catch(e => setError(e.message))
+  }
+  useEffect(load, [])
 
-function BookCard({ b, onSelect }) {
-  const p = b.progress
+  if (error) return <div className="pk"><p className="error" role="alert">{error}</p><button onClick={load}>دوباره امتحان کن</button></div>
+  if (!p) return <div className="pk"><div className="card skeleton" style={{ height: 300, marginTop: 20 }} /></div>
+
+  if (p.total_answered === 0) return (
+    <div className="pk">
+      <header className="pk-top"><h1 className="page-title" style={{ color: 'var(--text)' }}>پیشرفت</h1></header>
+      <div className="empty">
+        <Mascot size={84} />
+        <h2>هنوز چیزی برای نشان دادن نیست</h2>
+        <p className="pk-meta">بعد از اولین جلسه، اینجا می‌بینی چند نکته را یاد گرفته‌ای و کدام‌ها مرور می‌خواهند.</p>
+        <a className="primary link-primary" href="#/today">برو سراغ جلسهٔ امروز</a>
+      </div>
+    </div>
+  )
+
+  const share = p.total ? (p.learned / p.total) * 100 : 0
   return (
-    <button type="button" className="card book-progress-card" onClick={onSelect}>
-      <div className="bpc-head">
-        <img className="bpc-cover" src={b.cover} alt="" onError={e => { e.target.style.display = 'none' }} />
-        <div className="bpc-info">
-          <b>{b.name}</b>
-          <span className="muted">{fa(b.concepts_total)} نکته · دقت {pct(b.accuracy)}</span>
+    <div className="pk">
+      <header className="pk-top"><h1 className="page-title" style={{ color: 'var(--text)' }}>پیشرفت</h1></header>
+
+      <section className="pg-hero">
+        <div><span className="pk-big num">{fa(p.learned)}</span><span className="pk-unit">از {fa(p.total)} نکته را یاد گرفته‌ای</span></div>
+        <div className="pk-bar" role="progressbar" aria-valuemin={0} aria-valuemax={p.total} aria-valuenow={p.learned}>
+          <i style={{ width: `${share}%` }} /></div>
+        <p className="pk-meta">{fa(p.learning)} نکته در حال یادگیری · {fa(p.new)} نکتهٔ شروع‌نشده</p>
+      </section>
+
+      <section className="pg-stats">
+        <div><b className="num">{fa(p.streak_days)}</b><span>روز پیاپی</span></div>
+        <div><b className="num">{fa(p.best_streak)}</b><span>بهترین رشته</span></div>
+        <div><b className="num">{pct(p.week_accuracy)}</b><span>درست این هفته</span></div>
+        <div><b className="num">{fa(p.total_answered)}</b><span>سؤال تا امروز</span></div>
+      </section>
+
+      <section className="pg-block">
+        <h2 className="section-title">فردا</h2>
+        {p.due_tomorrow > 0
+          ? <p><Icon name="clock" size={18} /> <b className="num">{fa(p.due_tomorrow)}</b> نکته برای مرور فردا داری.</p>
+          : <p className="muted">فردا مروری در صف نیست؛ فقط نکته‌های تازه.</p>}
+        {p.due_today > 0 && <p className="muted"><span className="num">{fa(p.due_today)}</span> مرور هم برای امروز مانده است.</p>}
+      </section>
+
+      <section className="pg-block">
+        <h2 className="section-title">پنج هفتهٔ اخیر</h2>
+        <Heatmap days={p.activity} />
+        <p className="pk-meta">{fa(p.days_active)} روز تمرین کرده‌ای. هر خانه یک روز است؛ تیره‌تر یعنی سؤال بیشتر.</p>
+      </section>
+
+      {p.weak.length > 0 && (
+        <section className="pg-block">
+          <h2 className="section-title">نکته‌هایی که بیشتر اشتباه کرده‌ای</h2>
+          <ul className="pg-weak">
+            {p.weak.map(w => (
+              <li key={w.concept_id}>
+                <div><b>{w.title}</b><span className="muted">{w.chapter_title}</span></div>
+                <span className="pg-lapse num">{fa(w.lapses)} بار</span>
+              </li>
+            ))}
+          </ul>
+          <p className="pk-meta">این‌ها را سیستم زودتر و بیشتر برایت می‌آورد؛ لازم نیست کاری بکنی.</p>
+        </section>
+      )}
+
+      <section className="pg-block">
+        <div className="pt-head"><b><Icon name="notebook" size={20} /> دفترچهٔ اشتباه‌ها</b><span className="num">{fa(wrong)} سؤال</span></div>
+        <div className="pt-actions" style={{ marginTop: 8 }}>
+          <a className="btn-link" href="#/mistakes">دیدن فهرست</a>
+          {wrong > 0 && <button onClick={onStartWrong}>مرور اشتباه‌ها</button>}
         </div>
-      </div>
-      <div className="stacked-bar" role="img"
-           aria-label={Object.entries(STATUS).map(([k, s]) => `${s.fa} ${pct(p[k])}`).join('، ')}>
-        {Object.entries(STATUS).map(([k, s]) => p[k] > 0 && <div key={k} style={{ width: `${p[k] * 100}%`, background: s.color }} />)}
-      </div>
-      <div className="stacked-legend">
-        {Object.entries(STATUS).map(([k, s]) => p[k] > 0 && (
-          <span key={k} className="legend-item"><span className="legend-dot" style={{ background: s.color }} />{s.fa} {pct(p[k])}</span>
-        ))}
-      </div>
-    </button>
+      </section>
+    </div>
   )
 }

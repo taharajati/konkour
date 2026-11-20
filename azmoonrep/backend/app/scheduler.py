@@ -786,7 +786,8 @@ def plan_summary(student: dict, session: dict) -> dict:
                      for sl in session["slots"] if sl["status"] == "pending")
     kinds = {}
     for sl in session["slots"]:
-        kinds[sl.get("kind", "review")] = kinds.get(sl.get("kind", "review"), 0) + 1
+        if sl["status"] == "pending":          # the counts describe what is LEFT, like the big number
+            kinds[sl.get("kind", "review")] = kinds.get(sl.get("kind", "review"), 0) + 1
 
     # week strip: last 7 Tehran days, answered daily questions per day
     start = today - dt.timedelta(days=6)
@@ -845,6 +846,74 @@ def last_wrong_questions(student_id, limit=30):
     if not wrong_ids:
         return []
     return list(db.db.questions.find({"_id": {"$in": wrong_ids}}))
+
+
+def student_progress(student: dict) -> dict:
+    """everything the «پیشرفت» page shows: how many key points are learned, 5 weeks of
+    activity, the weakest key points and what is due tomorrow"""
+    sid = student["_id"]
+    today = clock.today()
+    today_s = today.isoformat()
+    tomorrow_s = (today + dt.timedelta(days=1)).isoformat()
+
+    servable = set(db.db.questions.distinct("concept_id", SERVABLE))
+    cq = {"source": "taxonomy", "retired": {"$ne": True}}
+    if student.get("scope_chapter_ids"):
+        cq["chapter_id"] = {"$in": student["scope_chapter_ids"]}
+    concepts = {c["concept_id"]: c for c in db.db.concepts.find(cq) if c["concept_id"] in servable}
+    states = {s["concept_id"]: s for s in db.db.concept_state.find({"student_id": sid})
+              if s["concept_id"] in concepts}
+    learned = sum(1 for s in states.values() if s.get("mastery_level", 0) >= 2)
+    started = len(states)
+
+    # activity: answered / correct per Tehran day over the last 35 days
+    since = clock.now_utc() - dt.timedelta(days=35)
+    per_day: dict[str, list] = {}
+    for r in db.db.responses.find({"student_id": sid, "answered_at": {"$gte": since}},
+                                  {"answered_at": 1, "correct": 1}):
+        d = clock.day_of(r["answered_at"]).isoformat()
+        cell = per_day.setdefault(d, [0, 0])
+        cell[0] += 1
+        cell[1] += 1 if r.get("correct") else 0
+    activity = []
+    for i in range(34, -1, -1):
+        d = (today - dt.timedelta(days=i)).isoformat()
+        a, c = per_day.get(d, [0, 0])
+        activity.append({"date": d, "answered": a, "correct": c})
+
+    # streaks over all days with an answer
+    all_days = sorted({clock.day_of(r["answered_at"]) for r in db.db.responses.find(
+        {"student_id": sid}, {"answered_at": 1})})
+    best = run = 0
+    prev = None
+    for d in all_days:
+        run = run + 1 if prev is not None and d - prev == dt.timedelta(days=1) else 1
+        best = max(best, run)
+        prev = d
+    stats = student_stats(sid)
+
+    weak = sorted((s for s in states.values() if s.get("lapses", 0) > 0),
+                  key=lambda s: (-s["lapses"], s["concept_id"]))[:5]
+    weak_out = [{"concept_id": s["concept_id"], "title": concepts[s["concept_id"]].get("title"),
+                 "chapter_title": concepts[s["concept_id"]].get("chapter_title"),
+                 "lapses": s["lapses"],
+                 "status": "learned" if s.get("mastery_level", 0) >= 2 else "learning"}
+                for s in weak]
+    return {
+        "total": len(concepts), "learned": learned, "learning": started - learned,
+        "new": len(concepts) - started,
+        "due_today": sum(1 for s in states.values() if due_day(s) <= today_s),
+        "due_tomorrow": sum(1 for s in states.values() if due_day(s) == tomorrow_s),
+        "activity": activity, "days_active": len(all_days),
+        "streak_days": stats["streak_days"], "best_streak": best,
+        "total_answered": stats["total_answered"], "accuracy": stats["accuracy"],
+        "week_answered": stats["week_answered"], "week_accuracy": stats["week_accuracy"],
+        "weak": weak_out,
+        "avg_questions_to_learn": (round(sum(s["answers_to_learned"] for s in states.values()
+                                             if "answers_to_learned" in s) /
+                                         max(1, sum(1 for s in states.values() if "answers_to_learned" in s)), 1)
+                                   if any("answers_to_learned" in s for s in states.values()) else None),
+    }
 
 
 def student_stats(student_id):

@@ -24,6 +24,8 @@ const P = {
   close: <path d="M6.5 6.5l11 11M17.5 6.5l-11 11" />,
   zoom: <><circle cx="10.5" cy="10.5" r="6.3" /><path d="M15.2 15.2 20 20" /><path d="M10.5 8v5M8 10.5h5" stroke={A} strokeWidth="2.4" /></>,
   phone: <><rect x="7" y="2.8" width="10" height="18.4" rx="2.4" /><circle cx="12" cy="17.6" r="1.3" fill={A} stroke="none" /></>,
+  progress: <><path d="M4.5 20.5V13M10.5 20.5V8.5M16.5 20.5V11.5" /><path d="M3 20.5h18" /><circle cx="19" cy="5" r="2.4" fill={A} stroke="none" /></>,
+  help: <><circle cx="12" cy="12" r="8.8" /><path d="M9.6 9.6a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .9-1 1.6" /><circle cx="12" cy="16.9" r="1.3" fill={A} stroke="none" /></>,
   notebook: <><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M9 3v18" /><path d="M12.5 8.5l1.6 1.6 3-3.2" stroke={A} strokeWidth="2.4" /></>,
 }
 

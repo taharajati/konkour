@@ -455,6 +455,92 @@ def pilot_report(user: dict = Depends(auth.require_admin)):
                     headers={"Content-Disposition": "attachment; filename=pilot-report.csv"})
 
 
+@router.get("/overview")
+def overview(user: dict = Depends(auth.require_admin)):
+    """the dashboard: users, activity, content readiness and the product metrics"""
+    now = clock.now_utc()
+    d1, d7 = now - dt.timedelta(hours=24), now - dt.timedelta(days=7)
+    users, resp, qs = db.db.users, db.db.responses, db.db.questions
+
+    status_counts = {r["_id"] or "pending": r["n"] for r in qs.aggregate(
+        [{"$group": {"_id": "$review_status", "n": {"$sum": 1}}}])}
+    approved_by_concept = {r["_id"]: r["n"] for r in qs.aggregate(
+        [{"$match": {"review_status": "approved"}}, {"$group": {"_id": "$concept_id", "n": {"$sum": 1}}}])}
+    concepts = list(db.db.concepts.find({"source": "taxonomy", "retired": {"$ne": True}},
+                                        {"concept_id": 1, "title": 1, "chapter_title": 1}))
+    rows = [{"concept_id": c["concept_id"], "title": c.get("title"), "chapter_title": c.get("chapter_title"),
+             "approved": approved_by_concept.get(c["concept_id"], 0)} for c in concepts]
+    thin = sorted((r for r in rows if r["approved"] < 5), key=lambda r: r["approved"])
+    w_total = resp.count_documents({"answered_at": {"$gte": d7}})
+    w_correct = resp.count_documents({"answered_at": {"$gte": d7}, "correct": True})
+    recent = list(users.find({"role": "student"}, {"username": 1, "display_name": 1, "created_at": 1,
+                                                   "onboarded": 1}).sort("created_at", -1).limit(8))
+    return {
+        "users": {
+            "students": users.count_documents({"role": "student"}),
+            "new_7d": users.count_documents({"role": "student", "created_at": {"$gte": d7}}),
+            "active_24h": len(resp.distinct("student_id", {"answered_at": {"$gte": d1}})),
+            "active_7d": len(resp.distinct("student_id", {"answered_at": {"$gte": d7}})),
+            "recent": [{"username": u["username"], "display_name": u.get("display_name"),
+                        "created_at": u.get("created_at"), "onboarded": u.get("onboarded", False)}
+                       for u in recent]},
+        "activity": {"answers_24h": resp.count_documents({"answered_at": {"$gte": d1}}),
+                     "answers_7d": w_total, "accuracy_7d": round(w_correct / w_total, 2) if w_total else None,
+                     "answers_total": resp.count_documents({})},
+        "content": {"questions": status_counts, "key_points": len(rows),
+                    "key_points_ready": sum(1 for r in rows if r["approved"] >= 5),
+                    "key_points_empty": sum(1 for r in rows if r["approved"] == 0),
+                    "thin": thin[:8],
+                    "flagged": qs.count_documents({"needs_answer_verification": True}),
+                    "open_reports": db.db.reports.count_documents({"status": "open"})},
+        "learning": learning_metrics(),
+        "paths": {"books_json": os.getenv("BOOKS_JSON", ""), "taxonomy_dir": os.getenv("TAXONOMY_DIR", ""),
+                  "questions_root": os.getenv("QUESTIONS_ROOT", "")},
+    }
+
+
+@router.get("/users")
+def list_users(search: str = "", skip: int = 0, limit: int = 30,
+               user: dict = Depends(auth.require_admin)):
+    import re as _re
+    q: dict = {"role": "student"}
+    if search.strip():
+        rx = {"$regex": _re.escape(search.strip()), "$options": "i"}
+        q["$or"] = [{"username": rx}, {"display_name": rx}]
+    total = db.db.users.count_documents(q)
+    page = list(db.db.users.find(q).sort("created_at", -1).skip(max(0, skip)).limit(min(max(1, limit), 100)))
+    ids = [u["_id"] for u in page]
+    stats = {r["_id"]: r for r in db.db.responses.aggregate([
+        {"$match": {"student_id": {"$in": ids}}},
+        {"$group": {"_id": "$student_id", "n": {"$sum": 1}, "ok": {"$sum": {"$cond": ["$correct", 1, 0]}},
+                    "last": {"$max": "$answered_at"}}}])}
+    learned = {r["_id"]: r["n"] for r in db.db.concept_state.aggregate([
+        {"$match": {"student_id": {"$in": ids}, "mastery_level": {"$gte": 2}}},
+        {"$group": {"_id": "$student_id", "n": {"$sum": 1}}}])}
+    return {"total": total, "items": [{
+        "username": u["username"], "display_name": u.get("display_name"), "grade": u.get("grade"),
+        "created_at": u.get("created_at"), "onboarded": u.get("onboarded", False),
+        "answered": stats.get(u["_id"], {}).get("n", 0),
+        "accuracy": round(stats[u["_id"]]["ok"] / stats[u["_id"]]["n"], 2) if u["_id"] in stats else None,
+        "last_active": stats.get(u["_id"], {}).get("last"),
+        "learned": learned.get(u["_id"], 0)} for u in page]}
+
+
+@router.post("/users/{username}/reset-password")
+def reset_password(username: str, user: dict = Depends(auth.require_admin)):
+    """for a student who forgot the password (there is no SMS): a temporary one, shown once"""
+    import secrets as _secrets
+    target = db.db.users.find_one({"username": username.strip().lower(), "role": "student"})
+    if not target:
+        raise HTTPException(404, "دانش‌آموز پیدا نشد.")
+    temp = _secrets.token_urlsafe(9)
+    db.db.users.update_one({"_id": target["_id"]},
+                           {"$set": {"password_hash": auth.hash_password(temp)},
+                            "$inc": {"token_version": 1}})
+    audit(user["username"], "password_reset", target["username"])
+    return {"username": target["username"], "temp_password": temp}
+
+
 @router.get("/stats")
 def stats(user: dict = Depends(auth.require_admin)):
     def count(col, q=None): return db.db[col].count_documents(q or {})

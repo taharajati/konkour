@@ -1,11 +1,41 @@
 import React, { useState } from 'react'
 import JalaliDate from './JalaliDate'
-import { patch, post, clearToken } from './api'
+import { patch, post, clearToken, setToken } from './api'
 import { fa, jalali, daysUntil, getTheme, applyTheme } from './ui'
 
 export const LOADS = [[10, 'سبک', 'حدود ۱۵ دقیقه'], [20, 'معمولی', 'حدود ۳۰ دقیقه'], [40, 'سنگین', 'حدود ۶۰ دقیقه']]
 
 // DESIGN §9.5: daily capacity, exam date, plan, font size, logout
+function PasswordCard() {
+  const [cur, setCur] = useState('')
+  const [next, setNext] = useState('')
+  const [msg, setMsg] = useState('')
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+  async function change(e) {
+    e.preventDefault()
+    if (busy) return
+    setBusy(true); setMsg(''); setError('')
+    try {
+      const r = await post('/auth/password', { current: cur, new: next })
+      setToken(r.access_token)             // this device stays signed in, every other one is signed out
+      setCur(''); setNext(''); setMsg('رمز عوض شد ✓ (در دستگاه‌های دیگر باید دوباره وارد شوی)')
+    } catch (err) { setError(err.message) } finally { setBusy(false) }
+  }
+  return (
+    <form className="card" onSubmit={change}>
+      <h2 className="section-title">تغییر رمز عبور</h2>
+      <label htmlFor="pw-cur">رمز فعلی</label>
+      <input id="pw-cur" dir="ltr" type="password" autoComplete="current-password" value={cur} onChange={e => setCur(e.target.value)} />
+      <label htmlFor="pw-new">رمز تازه (دست‌کم ۸ کاراکتر)</label>
+      <input id="pw-new" dir="ltr" type="password" autoComplete="new-password" value={next} onChange={e => setNext(e.target.value)} />
+      {error && <p className="error" role="alert">{error}</p>}
+      {msg && <p className="ok-text" role="status">{msg}</p>}
+      <button className="wide" disabled={busy || !cur || next.length < 8}>{busy ? '…' : 'عوض کردن رمز'}</button>
+    </form>
+  )
+}
+
 export default function Settings({ user, onSaved, onEditPlan, onLogout }) {
   const [name, setName] = useState(user.display_name || '')
   const [load, setLoad] = useState(user.daily_load || 20)
@@ -83,6 +113,14 @@ export default function Settings({ user, onSaved, onEditPlan, onLogout }) {
         <h2 className="section-title">برنامهٔ مطالعه</h2>
         <p className="muted">{fa((user.scope_chapter_ids || []).length)} فصل از {fa((user.scope_book_ids || []).length)} کتاب انتخاب شده است.</p>
         <button className="wide" onClick={onEditPlan}>تغییر کتاب‌ها و فصل‌ها</button>
+      </div>
+
+      <PasswordCard />
+
+      <div className="card">
+        <h2 className="section-title">کمک</h2>
+        <a className="btn-link wide" href="#/help">راهنما و پرسش‌های پرتکرار</a>
+        <a className="btn-link wide" href="#/mistakes">دفترچهٔ اشتباه‌ها</a>
       </div>
 
       <div className="card">

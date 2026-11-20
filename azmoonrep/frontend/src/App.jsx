@@ -7,6 +7,9 @@ import Today from './Today'
 import Path from './Path'
 import Session from './Session'
 import Settings from './Settings'
+import Progress from './Progress'
+import Mistakes from './Mistakes'
+import Help from './Help'
 import Admin from './Admin'
 import Onboarding from './Onboarding'
 import Icon, { ICON_NAMES } from './Icons'
@@ -24,7 +27,7 @@ function useHashRoute() {
   return [route, (path) => { window.location.hash = '#/' + path }]
 }
 
-const NAV = [['today', 'امروز'], ['path', 'مسیر']]   // two destinations (design/DESIGN.md)
+const NAV = [['today', 'امروز'], ['path', 'مسیر'], ['progress', 'پیشرفت']]   // three destinations
 
 function Kit() {   // icon and mascot sheet, for design review
   return (
@@ -66,7 +69,7 @@ export default function App() {
     if (!window.confirm('از حساب خارج می‌شوی؟')) return
     clearToken(); setUser(null); setProfile(null); setSession(null); go('today')
   }
-  if (profile.role === 'admin') return <div><Admin /><button className="logout" onClick={logout}>خروج</button></div>
+  if (profile.role === 'admin') return <Admin onLogout={logout} />
 
   const endSession = () => {
     setSession(null)
@@ -81,7 +84,8 @@ export default function App() {
       placementChapterId={session.placementChapterId || null} onExit={endSession} />
   }
 
-  const navView = view === 'path' ? 'path' : view === 'today' ? 'today' : null
+  const navView = ['path', 'today', 'progress'].includes(view) ? view : view === 'mistakes' ? 'progress' : null
+  const startWrong = () => setSession({ mode: 'practice', resume: true })
   return (
     <>
       <main>
@@ -90,6 +94,9 @@ export default function App() {
             onPractice={() => setSession({ mode: 'practice' })}
             onStartWrong={() => setSession({ mode: 'practice', resume: true })}
             onEditPlan={() => go('plan')} />
+          : view === 'progress' ? <Progress onStartWrong={startWrong} />
+          : view === 'mistakes' ? <Mistakes onStartWrong={startWrong} />
+          : view === 'help' ? <Help />
           : view === 'settings' ? <Settings user={profile} onSaved={refreshProfile} onEditPlan={() => go('plan')} onLogout={logout} />
           : view === 'plan' ? <Onboarding edit initialChapters={profile.scope_chapter_ids || []}
               initialBooks={profile.scope_book_ids || []}

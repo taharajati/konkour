@@ -177,12 +177,48 @@ def logout_everywhere(user: dict = Depends(auth.current_user)):
 def my_stats(user: dict = Depends(auth.current_user)):
     return scheduler.student_stats(user["_id"])
 
+@router.get("/me/progress")
+def my_progress(user: dict = Depends(auth.current_user)):
+    return scheduler.student_progress(user)
+
 @router.get("/me/wrong")
 def my_wrong(user: dict = Depends(auth.current_user)):
-    wrong = scheduler.last_wrong_questions(user["_id"], limit=50)
-    return [{"public_id": q.get("public_id"), "concept_id": q.get("concept_id"),
-             "topic": q.get("topic"), "subtopic": q.get("subtopic")}
-            for q in wrong]
+    wrong = [q for q in scheduler.last_wrong_questions(user["_id"], limit=50)
+             if q.get("review_status") == "approved"]
+    titles = {c["concept_id"]: c for c in db.db.concepts.find(
+        {"concept_id": {"$in": list({q.get("concept_id") for q in wrong})}},
+        {"concept_id": 1, "title": 1, "chapter_title": 1})}
+    out = []
+    for q in reversed(wrong):                     # most recent mistake first
+        c = titles.get(q.get("concept_id"), {})
+        stem = re.sub(r"\s+", " ", q.get("stem_md") or "").strip()
+        out.append({"public_id": q.get("public_id"), "concept_id": q.get("concept_id"),
+                    "concept_title": c.get("title"), "chapter_title": c.get("chapter_title"),
+                    "topic": q.get("topic"), "subtopic": q.get("subtopic"),
+                    "stem": stem[:140] + ("…" if len(stem) > 140 else "")})
+    return out
+
+class PasswordChange(BaseModel):
+    current: str = Field(max_length=128)
+    new: str = Field(max_length=128)
+
+@router.post("/password")
+def change_password(body: PasswordChange, user: dict = Depends(auth.current_user)):
+    key = str(user["_id"])
+    ratelimit.blocked("pw-change", key, limit=5, window=900)
+    if not user.get("password_hash") or not auth.verify_password(body.current, user["password_hash"]):
+        ratelimit.fail("pw-change", key, 900)
+        raise HTTPException(400, "رمز فعلی اشتباه است.")
+    if len(body.new) < MIN_PASSWORD:
+        raise HTTPException(422, f"رمز تازه باید دست‌کم {MIN_PASSWORD} کاراکتر باشد.")
+    if body.new == body.current:
+        raise HTTPException(422, "رمز تازه باید با رمز فعلی فرق کند.")
+    db.db.users.update_one({"_id": user["_id"]},
+                           {"$set": {"password_hash": auth.hash_password(body.new)},
+                            "$inc": {"token_version": 1}})       # every other device is signed out
+    audit(user["username"], "password_changed")
+    fresh = db.db.users.find_one({"_id": user["_id"]})
+    return {"ok": True, "access_token": auth.make_token(fresh)}
 
 @router.get("/me")
 def me(user: dict = Depends(auth.current_user)):

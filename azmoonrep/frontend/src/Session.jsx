@@ -35,6 +35,8 @@ export default function Session({ mode = 'daily', resume = false, dailyBookId = 
   const [lesson, setLesson] = useState(null)   // key-point card shown before a new concept
   const [writtenSolution, setWrittenSolution] = useState(null)
   const [zoomed, setZoomed] = useState(null)      // option figure opened large
+  const [notice, setNotice] = useState(null)     // {msg, retry}: a failed answer/next keeps the question on screen
+  const [tomorrow, setTomorrow] = useState(null)   // reviews due tomorrow, shown on the summary
   const startTime = useRef(Date.now())
   const busy = useRef(false)          // blocks double submit (Enter + click, double Enter)
   const base = BASE[mode]
@@ -123,6 +125,7 @@ export default function Session({ mode = 'daily', resume = false, dailyBookId = 
 
   async function submit(option = selected) {
     if (option === null || busy.current || feedback) return
+    setNotice(null)
     busy.current = true
     const timeMs = Date.now() - startTime.current
     try {
@@ -132,12 +135,13 @@ export default function Session({ mode = 'daily', resume = false, dailyBookId = 
       })
       setSelected(option)
       setFeedback({ ...fb, time_s: Math.round(timeMs / 1000), dontKnow: option === 0 })
-    } catch (e) { setError(e.message) }
+    } catch (e) { setNotice({ msg: e.message, retry: () => submit(option) }) }
     finally { busy.current = false }
   }
 
   async function next() {
     if (busy.current) return
+    setNotice(null)
     busy.current = true
     try {
       const s = await get(`${base}${qs}`)
@@ -146,7 +150,7 @@ export default function Session({ mode = 'daily', resume = false, dailyBookId = 
       if (nextIdx === -1) nextIdx = s.slots.findIndex(sl => sl.status === 'pending')
       if (nextIdx === -1) { setFinished(true); return }
       setIndex(nextIdx); loadQuestion(nextIdx)
-    } catch (e) { setError(e.message) }
+    } catch (e) { setNotice({ msg: e.message, retry: next }) }
     finally { busy.current = false }
   }
 
@@ -163,9 +167,14 @@ export default function Session({ mode = 'daily', resume = false, dailyBookId = 
     } catch (e) { setError(e.message) }
   }
 
+  useEffect(() => {
+    if (finished && mode === 'daily') get('/auth/me/progress').then(pr => setTomorrow(pr.due_tomorrow)).catch(() => {})
+  }, [finished])
+
   if (error) return (
     <div className="center-screen"><div className="card">
-      <p className="error">{error}</p>
+      <p className="error" role="alert">{error}</p>
+      {index !== null && !question && <button className="primary" onClick={() => { setError(''); loadQuestion(index) }}>دوباره امتحان کن</button>}
       <button onClick={onExit}>بازگشت</button>
     </div></div>
   )
@@ -194,6 +203,9 @@ export default function Session({ mode = 'daily', resume = false, dailyBookId = 
           <div className="result-strip">
             {answered.map((s, i) => <span key={i} className={s.correct ? 'dot ok' : 'dot no'} />)}
           </div>
+          {mode === 'daily' && tomorrow !== null && (
+            <p className="muted">{tomorrow > 0 ? `فردا ${fa(tomorrow)} نکته برای مرور داری.` : 'فردا فقط نکته‌های تازه داری.'}</p>
+          )}
           <button className="primary" onClick={onExit}>خب، تمام</button>
         </div>
       </div>
@@ -218,6 +230,12 @@ export default function Session({ mode = 'daily', resume = false, dailyBookId = 
         </span>
         <button className="ghost" aria-label="خروج از جلسه" onClick={exit}><Icon name="close" /></button>
       </div>
+      {notice && (
+        <div className="notice" role="alert">
+          <span>{notice.msg}</span>
+          <button onClick={notice.retry}>دوباره امتحان کن</button>
+        </div>
+      )}
       <div className="progress-bar" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done}>
         <div style={{ width: `${(done / Math.max(1, total)) * 100}%` }} />
       </div>

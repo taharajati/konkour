@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { get, post, patch, getBlobUrl } from './api'
+import { fa, pct, jalali } from './ui'
 import Markdown from './Markdown'
 import Figure, { FigureImage } from './Figure'
 
-const TABS = [["questions", "مرور سؤالات"], ["coverage", "پوشش نکته‌ها"], ["reports", "گزارش خطاها"], ["import", "وارد کردن"], ["stats", "آمار"]]
+const TABS = [["overview", "نمای کلی"], ["users", "دانش‌آموزها"], ["questions", "مرور سؤالات"], ["coverage", "پوشش نکته‌ها"], ["reports", "گزارش خطاها"], ["import", "وارد کردن"], ["stats", "آمار"]]
 const VERIFY_LABEL = {
   verified: ['کلید و حل مستقل یکی‌اند', 'ok'],
   conflict: ['کلید با حل مستقل فرق دارد', 'bad'],
@@ -14,16 +15,18 @@ const VERIFY_LABEL = {
 const MIN_APPROVED = 5   // a key point needs this many approved questions for real variety
 const FILTERS = [["all", "همه"], ["pending", "در انتظار"], ["approved", "تأیید شده"], ["rejected", "رد شده"], ["flagged", "مشکوک"]]
 
-export default function Admin() {
-  const [tab, setTab] = useState('questions')
+export default function Admin({ onLogout }) {
+  const [tab, setTab] = useState('overview')
   return (
     <div className="page admin-page">
-      <header className="topbar"><b>پنل مدیر</b></header>
+      <header className="topbar"><b>پنل مدیر</b>{onLogout && <button className="link-btn" onClick={onLogout}>خروج</button>}</header>
       <div className="tabs">
         {TABS.map(([id, label]) => (
           <button key={id} className={`pill ${tab === id ? 'active' : ''}`} onClick={() => setTab(id)}>{label}</button>
         ))}
       </div>
+      {tab === 'overview' && <OverviewTab onTab={setTab} />}
+      {tab === 'users' && <UsersTab />}
       {tab === 'import' && <ImportTab />}
       {tab === 'questions' && <QuestionsTab />}
       {tab === 'coverage' && <CoverageTab />}
@@ -34,10 +37,14 @@ export default function Admin() {
 }
 
 function ImportTab() {
-  const [booksPath, setBooksPath] = useState('D:/beh/main books/books_catalog.json')
-  const [taxonomyPath, setTaxonomyPath] = useState('D:/beh/taxonomy')
-  const [questionsPath, setQuestionsPath] = useState('D:/beh/question_bank')
+  const [booksPath, setBooksPath] = useState('')
+  const [taxonomyPath, setTaxonomyPath] = useState('')
+  const [questionsPath, setQuestionsPath] = useState('')
   const [log, setLog] = useState('')
+  // the server knows where its own data lives (env), so the form starts with those paths
+  useEffect(() => { get('/admin/overview').then(o => {
+    setBooksPath(o.paths.books_json); setTaxonomyPath(o.paths.taxonomy_dir); setQuestionsPath(o.paths.questions_root)
+  }).catch(() => {}) }, [])
   async function runImport() {
     setLog('در حال وارد کردن…')
     try {
@@ -533,6 +540,119 @@ function ReportsTab() {
           </div>
         </div>
       ))}
+    </div>
+  )
+}
+
+
+function Stat({ label, value, sub }) {
+  return <div className="ov-stat"><b className="num">{value}</b><span>{label}</span>{sub && <small>{sub}</small>}</div>
+}
+
+function OverviewTab({ onTab }) {
+  const [o, setO] = useState(null)
+  const [error, setError] = useState('')
+  useEffect(() => { get('/admin/overview').then(setO).catch(e => setError(e.message)) }, [])
+  if (error) return <div className="card"><p className="error" role="alert">{error}</p></div>
+  if (!o) return <div className="card"><div className="spinner" /></div>
+  const q = o.content.questions, L = o.learning
+  const todo = []
+  if ((q.pending || 0) > 0) todo.push([`${fa(q.pending)} سؤال منتظر بازبینی است`, 'questions'])
+  if (o.content.flagged > 0) todo.push([`${fa(o.content.flagged)} سؤال کلید تأییدنشده دارد`, 'questions'])
+  if (o.content.open_reports > 0) todo.push([`${fa(o.content.open_reports)} گزارش خطای باز از دانش‌آموزها`, 'reports'])
+  if (o.content.key_points_empty > 0) todo.push([`${fa(o.content.key_points_empty)} نکته هنوز هیچ سؤال تأییدشده ندارد`, 'coverage'])
+  return (
+    <>
+      <div className="ov-grid">
+        <Stat label="دانش‌آموز" value={fa(o.users.students)} sub={`${fa(o.users.new_7d)} تازه در ۷ روز`} />
+        <Stat label="فعال در ۲۴ ساعت" value={fa(o.users.active_24h)} sub={`${fa(o.users.active_7d)} نفر در ۷ روز`} />
+        <Stat label="پاسخ در ۲۴ ساعت" value={fa(o.activity.answers_24h)} sub={`${fa(o.activity.answers_7d)} در ۷ روز · ${pct(o.activity.accuracy_7d)} درست`} />
+        <Stat label="نکتهٔ آماده" value={`${fa(o.content.key_points_ready)} از ${fa(o.content.key_points)}`} sub="دست‌کم ۵ سؤال تأییدشده" />
+      </div>
+
+      <div className="card">
+        <h3>کارهای باز</h3>
+        {todo.length === 0 ? <p className="muted">چیزی منتظر تو نیست.</p> : (
+          <ul className="ov-todo">
+            {todo.map(([text, tab]) => <li key={text}><button className="link-btn" onClick={() => onTab(tab)}>{text} ←</button></li>)}
+          </ul>
+        )}
+      </div>
+
+      <div className="card">
+        <h3>سنجه‌های اصلی محصول</h3>
+        <div className="ov-grid">
+          <Stat label="میانهٔ سؤال تا یاد گرفتن" value={L.median_questions_to_learn ?? '—'} sub="بعد از فاصلهٔ ۷ روزه؛ هرچه کمتر بهتر" />
+          <Stat label="نکتهٔ یادگرفته" value={fa(L.key_points_learned)} />
+          <Stat label="حفظ بعد از ۲۱ روز" value={pct(L.retention_after_21_days)} sub={`${fa(L.long_gap_reviews)} مرور`} />
+        </div>
+      </div>
+
+      {o.content.thin.length > 0 && (
+        <div className="card">
+          <h3>کم‌سؤال‌ترین نکته‌ها</h3>
+          <table className="coverage"><tbody>
+            {o.content.thin.map(t => <tr key={t.concept_id} className={t.approved === 0 ? 'short' : ''}>
+              <td>{t.title}<div className="muted">{t.chapter_title}</div></td><td>{fa(t.approved)}</td></tr>)}
+          </tbody></table>
+        </div>
+      )}
+
+      <div className="card">
+        <h3>آخرین ثبت‌نام‌ها</h3>
+        {o.users.recent.length === 0 ? <p className="muted">هنوز کسی ثبت‌نام نکرده.</p> : (
+          <table className="coverage"><tbody>
+            {o.users.recent.map(u => <tr key={u.username}><td>{u.display_name || u.username}<div className="muted" dir="ltr">{u.username}</div></td>
+              <td>{u.created_at ? jalali(u.created_at) : ''}</td></tr>)}
+          </tbody></table>
+        )}
+        <button className="link-btn" onClick={() => onTab('users')}>همهٔ دانش‌آموزها ←</button>
+      </div>
+    </>
+  )
+}
+
+function UsersTab() {
+  const [search, setSearch] = useState('')
+  const [data, setData] = useState(null)
+  const [error, setError] = useState('')
+  const [temp, setTemp] = useState(null)       // {username, temp_password}, shown once
+  const load = (q = search) => { setError(''); get(`/admin/users?search=${encodeURIComponent(q)}`).then(setData).catch(e => setError(e.message)) }
+  useEffect(() => { load('') }, [])
+  async function reset(u) {
+    if (!window.confirm(`رمز ${u.username} عوض شود؟ از همهٔ دستگاه‌ها خارج می‌شود.`)) return
+    try { setTemp(await post(`/admin/users/${encodeURIComponent(u.username)}/reset-password`, {})) }
+    catch (e) { setError(e.message) }
+  }
+  return (
+    <div className="card">
+      <h3>دانش‌آموزها {data && <span className="muted">({fa(data.total)})</span>}</h3>
+      <form className="review-actions" onSubmit={e => { e.preventDefault(); load() }}>
+        <input placeholder="جستجوی نام یا نام کاربری" value={search} onChange={e => setSearch(e.target.value)} />
+        <button>جستجو</button>
+      </form>
+      {temp && (
+        <div className="notice" role="status">
+          <span>رمز موقت <b dir="ltr">{temp.username}</b>: <code dir="ltr">{temp.temp_password}</code> — فقط همین یک بار دیده می‌شود. به دانش‌آموز بده و بگو بعد از ورود عوضش کند.</span>
+          <button onClick={() => setTemp(null)}>بستن</button>
+        </div>
+      )}
+      {error && <p className="error" role="alert">{error}</p>}
+      {!data ? <div className="spinner" /> : data.items.length === 0 ? <p className="muted">کسی پیدا نشد.</p> : (
+        <div className="table-scroll">
+          <table className="coverage users"><thead><tr>
+            <th>نام</th><th>سؤال</th><th>درست</th><th>یادگرفته</th><th>آخرین فعالیت</th><th /></tr></thead>
+            <tbody>
+              {data.items.map(u => (
+                <tr key={u.username}>
+                  <td>{u.display_name || u.username}<div className="muted" dir="ltr">{u.username}</div></td>
+                  <td>{fa(u.answered)}</td><td>{pct(u.accuracy)}</td><td>{fa(u.learned)}</td>
+                  <td>{u.last_active ? jalali(u.last_active) : '—'}</td>
+                  <td><button className="link-btn" onClick={() => reset(u)}>رمز موقت</button></td>
+                </tr>))}
+            </tbody></table>
+        </div>
+      )}
     </div>
   )
 }
