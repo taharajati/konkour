@@ -13,7 +13,7 @@ const VERIFY_LABEL = {
   written: ['سؤال تشریحی', ''],
 }
 const MIN_APPROVED = 5   // a key point needs this many approved questions for real variety
-const FILTERS = [["all", "همه"], ["pending", "در انتظار"], ["approved", "تأیید شده"], ["rejected", "رد شده"], ["flagged", "مشکوک"]]
+const FILTERS = [["all", "همه"], ["pending_verified", "آمادهٔ تأیید (دو بررسی مستقل)"], ["pending", "در انتظار"], ["approved", "تأیید شده"], ["rejected", "رد شده"], ["flagged", "مشکوک"]]
 
 export default function Admin({ onLogout }) {
   const [tab, setTab] = useState('overview')
@@ -159,6 +159,12 @@ function QuestionsTab() {
         ? <div className="card"><p className="error">{data.error}</p></div>
         : <div className="card">
             <p className="muted">{data.total} سؤال {data.total > 50 ? `(نمایش ${skip + 1}–${skip + data.items.length})` : ''}</p>
+            {data.items.length > 0 && (
+              <p>
+                <button className="link-btn" onClick={() => setSel(Object.fromEntries(data.items.map(i => [i.public_id, true])))}>انتخاب همهٔ این صفحه ({data.items.length})</button>
+                {selIds.length > 0 && <button className="link-btn" onClick={() => setSel({})}>پاک کردن انتخاب</button>}
+              </p>
+            )}
             <div className="qlist">
               {data.items.map(q => (
                 <div key={q.public_id} className="qrow">
