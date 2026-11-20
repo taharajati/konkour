@@ -49,10 +49,13 @@ def mastery_level(st: dict) -> int:
     return 0
 
 
+IDLE_MS = 180_000    # beyond 3 minutes the tab was probably left open: the time says nothing
+
+
 def _grade_of(correct: bool, time_ms: int, expected_ms: int) -> str:
     if not correct:
         return "again"
-    return "hard" if time_ms > 2 * max(expected_ms, 1) else "good"
+    return "hard" if 2 * max(expected_ms, 1) < time_ms <= IDLE_MS else "good"
 
 
 def update_concept_state(student_id, concept_id, correct: bool, time_ms: int, expected_ms: int,
@@ -87,9 +90,10 @@ def update_concept_state(student_id, concept_id, correct: bool, time_ms: int, ex
             ease = max(1.3, ease - 0.2)
             interval = 1.0
         elif grade == "hard":
-            streak += 1
+            # slow but right: stay on the same rung of the ladder (a streak step without the
+            # matching interval would let the next success skip the 3-day check)
             ease = max(1.3, ease - 0.05)
-            interval = max(1.0, interval * 1.2)
+            interval = max(1.0, interval)
         else:
             streak += 1
             ease = min(3.2, ease + 0.1)
@@ -105,8 +109,11 @@ def update_concept_state(student_id, concept_id, correct: bool, time_ms: int, ex
     st["total_correct"] += 1 if correct else 0
     st["last_answer_day"] = today_s
     st["mastery_level"] = mastery_level(st)
-    if st["mastery_level"] >= 2 and "answers_to_learned" not in st:
-        # product metric: how many questions it took to learn this key point
+    if st["mastery_level"] >= 2 and "answers_to_first_pass" not in st:
+        st["answers_to_first_pass"] = st["total_answers"]      # old definition, kept to compare
+    if apply and correct and prior_interval >= 7 and "answers_to_learned" not in st:
+        # product metric: questions needed until the student answered correctly after a gap
+        # of 7+ days (the 3- and 7-day checks survived), not just until the ladder said so
         st["answers_to_learned"] = st["total_answers"]
         st["learned_day"] = today_s
     st["updated_at"] = now
@@ -587,7 +594,9 @@ def place(student_id, concept_id, question_id, level: str = "learning") -> int:
     """start a key point further up the ladder because the student already showed they
     know it (trial or placement). Never touches a point the student has already started.
     Returns 1 if the state was created."""
-    interval, streak = (7.0, 2) if level == "learned" else (3.0, 1)
+    # one 4-option answer is ~25% guessable: even "learned" must still come back after 3 days
+    # (the confirmation), and only the 7-day gap after that can make it "learned"
+    interval, streak = (3.0, 2) if level == "learned" else (3.0, 1)
     due = clock.today() + dt.timedelta(days=int(interval))
     st = {"ease": 2.5, "interval_days": interval, "streak": streak, "lapses": 0,
           "total_answers": 1, "total_correct": 1, "due_day": due.isoformat(),

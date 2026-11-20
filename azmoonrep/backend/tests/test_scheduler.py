@@ -270,3 +270,23 @@ def test_empirical_difficulty_and_time_calibration(fresh_db):
     updated = fresh_db.questions.find_one({"_id": q["_id"]})
     assert scheduler.effective_difficulty(updated) == 5
     assert scheduler.expected_time(updated) == 62_000
+
+
+def test_hard_answer_repeats_the_step_and_idle_time_is_not_hard(fresh_db):
+    up = scheduler.update_concept_state
+    up("s", "h1", True, 1000, 40000)                       # day 0: streak 1, due tomorrow
+    set_day(1)
+    st = up("s", "h1", True, 90_000, 40000)                # slow (2x expected) but right
+    assert st["streak"] == 1 and st["interval_days"] == 1.0 and st["last_grade"] == "hard"
+    set_day(2)
+    st = up("s", "h1", True, 90_000, 40000)
+    assert st["streak"] == 1, "still the same rung: no skipping the 3-day check"
+    set_day(3)
+    st = up("s", "h1", True, 600_000, 40000)               # tab left open for 10 minutes
+    assert st["last_grade"] == "good" and st["streak"] == 2 and st["interval_days"] == 3.0
+
+
+def test_placed_learned_must_still_pass_a_three_day_check(fresh_db):
+    scheduler.place("s", "p1", "q1", "learned")
+    st = fresh_db.concept_state.find_one({"concept_id": "p1"})
+    assert st["interval_days"] == 3.0 and st["due_day"] == "2026-11-17" and st["mastery_level"] == 1

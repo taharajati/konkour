@@ -81,7 +81,7 @@ export default function Start({ onLoggedIn }) {
       <div className="st">
         {top}
         {first
-          ? <><h1>هر نکته را با کمترین تست یاد بگیر.</h1><p className="st-sub">با همین سؤال شروع کن؛ ثبت‌نام لازم نیست.</p></>
+          ? <><h1>هر نکته را با کمترین تست یاد بگیر.</h1><p className="st-sub">فعلاً برای ریاضی نهم: مجموعه‌ها و عددهای حقیقی. با همین سؤال شروع کن؛ ثبت‌نام لازم نیست.</p></>
           : <p className="st-sub" style={{ marginTop: 22 }}>سؤال {fa(i + 1)} از {fa(trial.questions.length)}</p>}
         <div className="st-steps" aria-hidden="true">{trial.questions.map((_, k) => <i key={k} className={k < answers.length ? 'on' : ''} />)}</div>
         <div className="question-box">

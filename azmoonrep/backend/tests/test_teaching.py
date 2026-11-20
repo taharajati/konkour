@@ -116,6 +116,11 @@ def test_questions_to_learn_metric(fresh_db):
         set_day(day)
         up(sid, "m1", ok, 1000, 40000, scheduled=True)
     st = fresh_db.concept_state.find_one({"concept_id": "m1"})
-    assert st["mastery_level"] >= 2 and st["answers_to_learned"] == 5
+    assert st["mastery_level"] >= 2 and st["answers_to_first_pass"] == 5
+    assert "answers_to_learned" not in st, "the 7-day gap has not been survived yet"
+    set_day(13)                                            # correct after the 7-day gap
+    up(sid, "m1", True, 1000, 40000, scheduled=True)
+    st = fresh_db.concept_state.find_one({"concept_id": "m1"})
+    assert st["answers_to_learned"] == 6
     m = learning_metrics()
-    assert m["key_points_learned"] == 1 and m["median_questions_to_learn"] == 5
+    assert m["key_points_learned"] == 1 and m["median_questions_to_learn"] == 6
