@@ -10,6 +10,7 @@ const VERIFY_LABEL = {
   conflict: ['کلید با حل مستقل فرق دارد', 'bad'],
   solver_only: ['کلید چاپی نبود؛ پاسخ از حل مستقل', 'warn'],
   needs_fix: ['متن یا گزینه‌ها مشکل دارد', 'bad'],
+  code_checked: ['کلید را کد پایتون دوباره حساب کرده؛ حل‌کنندهٔ مستقل هنوز نه', 'warn'],
   written: ['سؤال تشریحی', ''],
 }
 const MIN_APPROVED = 5   // a key point needs this many approved questions for real variety
