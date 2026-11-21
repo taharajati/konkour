@@ -906,3 +906,12 @@ table.users td:not(:first-child), table.users th:not(:first-child) { width: auto
 .hm-c { aspect-ratio: auto; height: 22px; border-radius: 5px; }
 .admin-page .topbar { display: flex; justify-content: space-between; align-items: center; }
 .pg-hero .pk-unit { display: inline; }
+
+/* ---- choose grade and books first (start flow) ---- */
+.st-choices { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 18px 0; }
+.st-choices.st-books { grid-template-columns: 1fr; }
+.st-choice { display: grid; gap: 4px; text-align: start; padding: 16px; min-height: 76px; border: 1.5px solid var(--border); border-radius: 14px; background: var(--card); color: var(--text); }
+.st-choice b { font-size: 18px; }
+.st-choice span { font-size: 13px; color: var(--muted); }
+.st-choice.on { border-color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); }
+.st-choice:disabled { opacity: .45; }

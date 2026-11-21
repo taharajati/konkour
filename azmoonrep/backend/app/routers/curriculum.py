@@ -15,6 +15,24 @@ def _category(st):
 
 MASTERY_FA = {0: "نیاموخته", 1: "در حال یادگیری", 2: "یاد گرفته", 3: "مسلط"}
 
+@router.get("/catalog")
+def catalog():
+    """public (no login): grades -> books with how much of each is ready, for the first screen"""
+    approved = {r["_id"]: r["n"] for r in db.db.questions.aggregate(
+        [{"$match": {"review_status": "approved"}}, {"$group": {"_id": "$concept_id", "n": {"$sum": 1}}}])}
+    by_grade: dict = {}
+    for b in db.db.books.find().sort([("grade", 1), ("order", 1)]):
+        concepts = [c["concept_id"] for c in db.db.concepts.find(
+            {"book_id": b["book_id"], "source": "taxonomy", "retired": {"$ne": True}}, {"concept_id": 1})]
+        ready = [c for c in concepts if approved.get(c)]
+        by_grade.setdefault(b.get("grade"), []).append({
+            "book_id": b["book_id"], "name": b["name"], "field": b.get("reshte"),
+            "chapters": db.db.chapters.count_documents({"book_id": b["book_id"]}),
+            "key_points": len(concepts), "ready_key_points": len(ready),
+            "approved_questions": sum(approved[c] for c in ready)})
+    return {"grades": [{"grade": g, "books": bs} for g, bs in sorted(by_grade.items(), key=lambda x: (x[0] is None, x[0]))]}
+
+
 @router.get("/books")
 def books(user: dict = Depends(auth.current_user)):
     out = []

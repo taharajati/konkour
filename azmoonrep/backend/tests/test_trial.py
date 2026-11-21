@@ -66,3 +66,25 @@ def test_claim_without_trial_sets_default_plan(fresh_db):
     assert c.post("/trial/claim", headers=h, json={"grade": 9}).status_code == 200
     me = c.get("/auth/me", headers=h).json()
     assert me["onboarded"] and me["daily_load"] == 20 and me["scope_book_ids"] == ["B"]
+
+
+def test_catalog_and_book_choice(fresh_db):
+    _prep(fresh_db)
+    fresh_db.concepts.update_many({}, {"$set": {"book_id": "B"}})
+    c = TestClient(app)
+    cat = c.get("/curriculum/catalog").json()                  # public: no login
+    book = cat["grades"][0]["books"][0]
+    assert cat["grades"][0]["grade"] == 9 and book["book_id"] == "B"
+    assert book["key_points"] >= 1 and book["ready_key_points"] >= 1 and book["chapters"] == 2
+    # a chosen book with no approved questions must not fall back to another book's questions
+    fresh_db.books.insert_one({"book_id": "Z", "name": "خالی", "grade": 10})
+    assert c.post("/trial/start", json={"grade": 10, "book_ids": ["Z"]}).status_code == 404
+    t = c.post("/trial/start", json={"grade": 9, "book_ids": ["B"]})
+    assert t.status_code == 200 and len(t.json()["questions"]) == 3
+    # the account's plan follows the chosen books
+    c.post("/auth/register", json={"username": "kian", "password": "long-enough-1"})
+    tok = c.post("/auth/login", json={"username": "kian", "password": "long-enough-1"}).json()["access_token"]
+    h = {"Authorization": "Bearer " + tok}
+    assert c.post("/trial/claim", headers=h, json={"grade": 10, "book_ids": ["Z"]}).status_code == 200
+    me = c.get("/auth/me", headers=h).json()
+    assert me["scope_book_ids"] == ["Z"]

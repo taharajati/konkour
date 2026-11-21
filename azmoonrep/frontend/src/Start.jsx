@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { post, setToken } from './api'
+import { get, post, setToken } from './api'
 import { fa, GRADE_FA } from './ui'
 import Icon from './Icons'
 import Mascot from './Mascot'
@@ -7,7 +7,7 @@ import Markdown from './Markdown'
 import Login from './Login'
 
 // The landing page IS the first question (design/DESIGN.md §3): give first, ask later.
-// q (three questions) -> result + prefilled plan -> name -> username + password -> app.
+// grade -> books (the student chooses) -> three questions from those books -> plan -> name -> username + password -> app.
 const LOADS = [10, 20, 40]
 const KEY = 'azmoon_trial'
 const load = () => { try { return JSON.parse(sessionStorage.getItem(KEY) || 'null') } catch { return null } }
@@ -17,10 +17,12 @@ export default function Start({ onLoggedIn }) {
   const [trial, setTrial] = useState(saved?.trial || null)     // {token, grade, questions}
   const [answers, setAnswers] = useState(saved?.answers || []) // display option per question
   const [results, setResults] = useState(saved?.results || []) // true/false per question
-  const [step, setStep] = useState(saved?.step || 'loading')   // loading|q|result|name|account|login
+  const [step, setStep] = useState(saved?.step || 'grade')       // grade|books|loading|q|result|name|account|login
+  const [catalog, setCatalog] = useState(null)                  // [{grade, books:[...]}]
+  const [chosen, setChosen] = useState(saved?.chosen || [])     // book ids
   const [selected, setSelected] = useState(null)
   const [feedback, setFeedback] = useState(null)
-  const [grade, setGrade] = useState(saved?.grade || 9)
+  const [grade, setGrade] = useState(saved?.grade || null)
   const [daily, setDaily] = useState(saved?.daily || 20)
   const [name, setName] = useState(saved?.name || '')
   const [username, setUsername] = useState('')
@@ -29,15 +31,21 @@ export default function Start({ onLoggedIn }) {
   const [busy, setBusy] = useState(false)
   const i = answers.length - (feedback ? 1 : 0)
 
-  useEffect(() => {
-    if (saved?.trial) return
-    post('/trial/start', {}).then(t => { setTrial(t); setGrade(t.grade || 9); setStep('q') })
-      .catch(() => setStep('result'))          // no approved questions yet: go straight to the plan
-  }, [])
+  useEffect(() => { get('/curriculum/catalog').then(c => setCatalog(c.grades)).catch(() => setCatalog([])) }, [])
   useEffect(() => {
     if (step === 'loading' || step === 'login') return
-    sessionStorage.setItem(KEY, JSON.stringify({ trial, answers, results, step: feedback ? 'q' : step, grade, daily, name }))
-  }, [trial, answers, results, step, grade, daily, name, feedback])
+    sessionStorage.setItem(KEY, JSON.stringify({ trial, answers, results, step: feedback ? 'q' : step, grade, chosen, daily, name }))
+  }, [trial, answers, results, step, grade, chosen, daily, name, feedback])
+
+  const gradeBooks = (catalog || []).find(g => g.grade === grade)?.books || []
+  const chosenBooks = gradeBooks.filter(b => chosen.includes(b.book_id))
+  const toggle = (id) => setChosen(c => c.includes(id) ? c.filter(x => x !== id) : [...c, id])
+  function startTrial() {
+    setStep('loading'); setTrial(null); setAnswers([]); setResults([])
+    post('/trial/start', { grade, book_ids: chosen })
+      .then(t => { setTrial(t); setStep('q') })
+      .catch(() => setStep('result'))             // these books have no approved questions yet: straight to the plan
+  }
 
   async function run(fn) {
     if (busy) return
@@ -58,7 +66,7 @@ export default function Start({ onLoggedIn }) {
     await post('/auth/register', { username: username.trim(), password, grade: Number(grade), display_name: name.trim() })
     const r = await post('/auth/login', { username: username.trim(), password })
     setToken(r.access_token)
-    await post('/trial/claim', { token: trial?.token || null, answers, grade: Number(grade),
+    await post('/trial/claim', { token: trial?.token || null, answers, grade: Number(grade), book_ids: chosen,
                                  daily_load: daily, display_name: name })
     sessionStorage.removeItem(KEY)
     onLoggedIn(r)
@@ -72,6 +80,48 @@ export default function Start({ onLoggedIn }) {
       <button className="link-btn" onClick={() => setStep('login')}>حساب دارم</button>
     </header>
   )
+  if (step === 'grade') return (
+    <div className="st">
+      {top}
+      <h1>کدام پایه؟</h1>
+      <p className="st-sub">پایه‌ات را انتخاب کن؛ بعد کتاب‌هایش را می‌بینی.</p>
+      <div className="st-choices" role="radiogroup" aria-label="پایه">
+        {[9, 10, 11, 12].map(g => {
+          const bs = (catalog || []).find(x => x.grade === g)?.books || []
+          const ready = bs.reduce((n, b) => n + b.ready_key_points, 0)
+          return (
+            <button key={g} type="button" role="radio" aria-checked={grade === g} className={`st-choice ${grade === g ? 'on' : ''}`}
+                    disabled={!bs.length} onClick={() => { setGrade(g); setChosen([]); setStep('books') }}>
+              <b>{GRADE_FA[g]}</b>
+              <span>{bs.length ? `${fa(bs.length)} کتاب${ready ? '' : ' · به‌زودی'}` : '—'}</span>
+            </button>)
+        })}
+      </div>
+    </div>
+  )
+
+  if (step === 'books') return (
+    <div className="st">
+      {top}
+      <h1>کدام کتاب‌ها؟</h1>
+      <p className="st-sub">پایهٔ {GRADE_FA[grade]}. هر چند کتاب که می‌خواهی را انتخاب کن؛ بعداً هم از تنظیمات عوضش می‌کنی.</p>
+      <div className="st-choices st-books">
+        {gradeBooks.map(b => (
+          <button key={b.book_id} type="button" role="checkbox" aria-checked={chosen.includes(b.book_id)}
+                  className={`st-choice ${chosen.includes(b.book_id) ? 'on' : ''}`} onClick={() => toggle(b.book_id)}>
+            <b>{b.name}</b>
+            <span>{b.field ? `${b.field} · ` : ''}{fa(b.chapters)} فصل</span>
+            <span className={b.ready_key_points ? 'ok-text' : 'muted'}>
+              {b.ready_key_points ? `${fa(b.ready_key_points)} از ${fa(b.key_points)} نکته سؤال دارد` : 'سؤال‌ها در حال آماده‌سازی'}
+            </span>
+          </button>
+        ))}
+      </div>
+      <button className="primary pk-cta" disabled={!chosen.length} onClick={startTrial}>ادامه</button>
+      <button type="button" className="link-btn" onClick={() => setStep('grade')}><Icon name="arrow" size={16} className="back" /> پایهٔ دیگر</button>
+    </div>
+  )
+
   if (step === 'loading') return <div className="st">{top}<div className="card skeleton" style={{ height: 300, marginTop: 30 }} /></div>
 
   if (step === 'q') {
@@ -81,7 +131,7 @@ export default function Start({ onLoggedIn }) {
       <div className="st">
         {top}
         {first
-          ? <><h1>هر نکته را با کمترین تست یاد بگیر.</h1><p className="st-sub">فعلاً برای ریاضی نهم: مجموعه‌ها و عددهای حقیقی. با همین سؤال شروع کن؛ ثبت‌نام لازم نیست.</p></>
+          ? <><h1>هر نکته را با کمترین تست یاد بگیر.</h1><p className="st-sub">سه سؤال از {chosenBooks.map(b => b.name).join(' و ')}. ثبت‌نام لازم نیست.</p></>
           : <p className="st-sub" style={{ marginTop: 22 }}>سؤال {fa(i + 1)} از {fa(trial.questions.length)}</p>}
         <div className="st-steps" aria-hidden="true">{trial.questions.map((_, k) => <i key={k} className={k < answers.length ? 'on' : ''} />)}</div>
         <div className="question-box">
@@ -125,17 +175,14 @@ export default function Start({ onLoggedIn }) {
             <div><span className="pk-big num">{fa(known)}</span><span className="pk-unit">از {fa(results.length)} نکته را بلدی</span></div></div>
           <p className="st-sub" style={{ marginTop: 10 }}>{known === results.length ? 'این‌ها را فقط مرور می‌کنی.' : 'بقیه را با درس‌نامهٔ کوتاه و سؤال‌های تازه یاد می‌گیری.'}</p>
         </>
-      ) : <><h1>هر نکته را با کمترین تست یاد بگیر.</h1><p className="st-sub">برنامه‌ات آماده است؛ اگر خواستی عوضش کن.</p></>}
+      ) : <><h1>برنامه‌ات آماده است</h1><p className="st-sub">سؤال‌های {chosenBooks.map(b => b.name).join(' و ')} هنوز در حال بازبینی است. ثبت‌نام کن؛ هر نکته‌ای که سؤالش تأیید شود، به برنامه‌ات اضافه می‌شود.</p></>}
       <div className="st-plan">
-        <div className="row"><span>پایه</span>
-          <select aria-label="پایه" value={grade} onChange={e => setGrade(e.target.value)}>
-            {[9, 10, 11, 12].map(g => <option key={g} value={g}>{GRADE_FA[g]}</option>)}
-          </select></div>
+        <div className="row"><span>پایه</span><span>{GRADE_FA[grade]} <button type="button" className="link-btn" onClick={() => setStep('grade')}>تغییر</button></span></div>
         <div className="row"><span>هر روز</span>
           <div className="segmented" role="radiogroup" aria-label="حجم روزانه">
             {LOADS.map(n => <button key={n} type="button" role="radio" aria-checked={daily === n} className={daily === n ? 'on' : ''} onClick={() => setDaily(n)}>{fa(n)} سؤال</button>)}
           </div></div>
-        <div className="row"><span>کتاب‌ها</span><span className="muted">ریاضی پایهٔ {GRADE_FA[grade]}، فصل‌هایی که سؤال دارند</span></div>
+        <div className="row"><span>کتاب‌ها</span><span>{chosenBooks.map(b => b.name).join('، ')} <button type="button" className="link-btn" onClick={() => setStep('books')}>تغییر</button></span></div>
       </div>
       <button className="primary pk-cta" onClick={() => setStep('name')}>همین خوب است</button>
     </div>

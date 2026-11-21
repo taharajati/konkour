@@ -30,9 +30,11 @@ def _read(token: str) -> dict:
     return data
 
 
-def _servable_concepts(grade: int | None) -> list:
+def _servable_concepts(grade: int | None, book_ids: list | None = None) -> list:
     q = {"source": "taxonomy", "retired": {"$ne": True}}
-    if grade:
+    if book_ids:
+        q["book_id"] = {"$in": book_ids}
+    elif grade:
         q["grade"] = grade
     out = []
     for c in db.db.concepts.find(q).sort("order_in_curriculum", 1):
@@ -47,11 +49,14 @@ def _servable_concepts(grade: int | None) -> list:
 
 class StartBody(BaseModel):
     grade: int | None = None
+    book_ids: list[str] = Field(default=[], max_length=8)
 
 @router.post("/start")
 def start(body: StartBody, request: Request):
     ratelimit.hit("trial-ip", client_ip(request), limit=60, window=3600)
-    pool = _servable_concepts(body.grade) or _servable_concepts(None)
+    # the student chose books: only their questions (never fall back to another grade's)
+    pool = _servable_concepts(body.grade, body.book_ids) if body.book_ids \
+        else (_servable_concepts(body.grade) or _servable_concepts(None))
     if not pool:
         raise HTTPException(404, "no approved questions yet")
     # spread over the curriculum: first, middle, last
@@ -96,13 +101,17 @@ def answer(body: AnswerBody, request: Request):
             "key_point": scheduler.key_point(q["concept_id"])}
 
 
-def default_scope(grade: int | None) -> dict:
-    """books of the grade; chapters that already have approved questions (all, if none)"""
-    books = list(db.db.books.find({"grade": grade})) if grade else []
+def default_scope(grade: int | None, book_ids: list | None = None) -> dict:
+    """the books the student chose (else all books of the grade); chapters that already have
+    approved questions (all chapters, if none yet)"""
+    if book_ids:
+        books = list(db.db.books.find({"book_id": {"$in": book_ids}}))
+    else:
+        books = list(db.db.books.find({"grade": grade})) if grade else []
     if not books:
         return {"scope_book_ids": [], "scope_chapter_ids": []}
     book_ids = [b["book_id"] for b in books]
-    ready = {c.get("chapter_id") for c, _ in _servable_concepts(grade)}
+    ready = {c.get("chapter_id") for c, _ in _servable_concepts(grade, [b["book_id"] for b in books])}
     chapters = [ch["chapter_id"] for ch in db.db.chapters.find({"book_id": {"$in": book_ids}})]
     with_q = [c for c in chapters if c in ready]
     return {"scope_book_ids": book_ids, "scope_chapter_ids": with_q or chapters}
@@ -112,6 +121,7 @@ class ClaimBody(BaseModel):
     token: str | None = Field(default=None, max_length=4000)
     answers: list[int] = Field(default=[], max_length=10)
     grade: int | None = None
+    book_ids: list[str] = Field(default=[], max_length=8)
     daily_load: int = DEFAULT_DAILY_LOAD
     display_name: str | None = Field(default=None, max_length=40)
 
@@ -140,7 +150,7 @@ def claim(body: ClaimBody, user: dict = Depends(auth.current_user)):
         upd["display_name"] = body.display_name.strip()[:40]
     if not user.get("onboarded"):
         grade = body.grade or (data or {}).get("g")
-        upd.update(default_scope(grade))
+        upd.update(default_scope(grade, body.book_ids))
         upd.update({"grade": grade, "onboarded": True,
                     "daily_load": body.daily_load if body.daily_load in DAILY_LOADS else DEFAULT_DAILY_LOAD})
         db.db.sessions.delete_many({"student_id": user["_id"], "date": clock.today_str()})
