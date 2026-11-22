@@ -28,8 +28,10 @@ def catalog():
         by_grade.setdefault(b.get("grade"), []).append({
             "book_id": b["book_id"], "name": b["name"], "field": b.get("reshte"),
             "chapters": db.db.chapters.count_documents({"book_id": b["book_id"]}),
-            "key_points": len(concepts), "ready_key_points": len(ready),
+            "subject": b.get("subject") or "ریاضی", "key_points": len(concepts), "ready_key_points": len(ready),
             "approved_questions": sum(approved[c] for c in ready)})
+    for bs in by_grade.values():                 # books with questions first, the rest keep catalog order
+        bs.sort(key=lambda b: b["ready_key_points"] == 0)
     return {"grades": [{"grade": g, "books": bs} for g, bs in sorted(by_grade.items(), key=lambda x: (x[0] is None, x[0]))]}
 
 

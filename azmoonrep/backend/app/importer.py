@@ -94,7 +94,7 @@ def import_books(books_json_path: str) -> dict:
             {"book_id": book_id},
             {"$set": {"book_id": book_id, "name": b["book"],
                       "grade": b.get("grade") or _grade_fa_to_num(b.get("paaye")),
-                      "paaye": b.get("paaye"), "reshte": b.get("reshte"),
+                      "paaye": b.get("paaye"), "reshte": b.get("reshte"), "subject": b.get("subject"),
                       "dore": b.get("dore"), "order": order,
                       "updated_at": clock.now_utc()}},
             upsert=True)
