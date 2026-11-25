@@ -178,8 +178,38 @@ def my_stats(user: dict = Depends(auth.current_user)):
     return scheduler.student_stats(user["_id"])
 
 @router.get("/me/progress")
-def my_progress(user: dict = Depends(auth.current_user)):
+def my_progress(book_id: str | None = None, user: dict = Depends(auth.current_user)):
+    """progress over the whole plan, or scoped to one book (book switcher)"""
+    if book_id:
+        chapters = [c["chapter_id"] for c in
+                    db.db.chapters.find({"book_id": book_id}, {"chapter_id": 1})]
+        u = dict(user)
+        u["scope_chapter_ids"] = chapters
+        return scheduler.student_progress(u)
     return scheduler.student_progress(user)
+
+@router.get("/me/dangerous")
+def my_dangerous(limit: int = 8, user: dict = Depends(auth.current_user)):
+    """key points the student was CONFIDENT about and still got wrong — the
+    highest-value study targets ("dangerous key points")"""
+    rows = list(db.db.responses.aggregate([
+        {"$match": {"student_id": user["_id"], "correct": False, "confidence": "sure"}},
+        {"$group": {"_id": "$concept_id", "n": {"$sum": 1},
+                    "last_at": {"$max": "$answered_at"}}},
+        {"$sort": {"n": -1, "last_at": -1}},
+        {"$limit": max(1, min(limit, 20))}]))
+    if not rows:
+        return []
+    concepts = {c["concept_id"]: c for c in db.db.concepts.find(
+        {"concept_id": {"$in": [r["_id"] for r in rows]}},
+        {"concept_id": 1, "title": 1, "chapter_title": 1, "book_name": 1})}
+    out = [{"concept_id": r["_id"],
+            "title": concepts.get(r["_id"], {}).get("title", r["_id"]),
+            "chapter_title": concepts.get(r["_id"], {}).get("chapter_title"),
+            "book_name": concepts.get(r["_id"], {}).get("book_name"),
+            "confident_wrong": r["n"]}
+           for r in rows]
+    return out
 
 @router.get("/me/wrong")
 def my_wrong(user: dict = Depends(auth.current_user)):

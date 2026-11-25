@@ -4,6 +4,7 @@ import Markdown from './Markdown'
 import Icon from './Icons'
 import Figure, { FigureImage, Lightbox } from './Figure'
 import Mascot from './Mascot'
+import { playCorrect, playWrong, playFinish } from './sounds'
 
 const BASE = { daily: '/sessions/daily', practice: '/sessions/practice', placement: '/sessions/placement' }
 const TITLES = { daily: 'جلسهٔ امروز تمام شد', practice: 'تمرین تمام شد', placement: 'آزمون تعیین سطح تمام شد' }
@@ -28,6 +29,7 @@ export default function Session({ mode = 'daily', resume = false, dailyBookId = 
   const [question, setQuestion] = useState(null)
   const [selected, setSelected] = useState(null)
   const [feedback, setFeedback] = useState(null)
+  const [burst, setBurst] = useState(0)          // increments per correct answer: particle burst
   const [finished, setFinished] = useState(false)
   const [error, setError] = useState('')
   const [fontScale, setFontScale] = useState(Number(localStorage.getItem('font_scale') || 1))
@@ -74,7 +76,8 @@ export default function Session({ mode = 'daily', resume = false, dailyBookId = 
         // stop the focused button's own Enter-click: one Enter = one action
         e.preventDefault()
         if (feedback) next()
-        else submit()
+        else if (mode === 'placement') submit()
+        else submit(selected, selected === 0 ? 'unsure' : 'sure')
       }
     }
     window.addEventListener('keydown', h)
@@ -123,7 +126,7 @@ export default function Session({ mode = 'daily', resume = false, dailyBookId = 
     } catch (e) { setError(e.message) }
   }
 
-  async function submit(option = selected) {
+  async function submit(option = selected, confidence = null) {
     if (option === null || busy.current || feedback) return
     setNotice(null)
     busy.current = true
@@ -132,9 +135,11 @@ export default function Session({ mode = 'daily', resume = false, dailyBookId = 
       const fb = await post(`${base}/answer/${index}${qs}`, {
         selected_option: option,
         time_ms: timeMs,
+        confidence,
       })
       setSelected(option)
       setFeedback({ ...fb, time_s: Math.round(timeMs / 1000), dontKnow: option === 0 })
+      if (fb.correct) { playCorrect(); setBurst(b => b + 1) } else playWrong()
     } catch (e) { setNotice({ msg: e.message, retry: () => submit(option) }) }
     finally { busy.current = false }
   }
@@ -168,7 +173,7 @@ export default function Session({ mode = 'daily', resume = false, dailyBookId = 
   }
 
   useEffect(() => {
-    if (finished && mode === 'daily') get('/auth/me/progress').then(pr => setTomorrow(pr.due_tomorrow)).catch(() => {})
+    if (finished) { playFinish(); if (mode === 'daily') get('/auth/me/progress').then(pr => setTomorrow(pr.due_tomorrow)).catch(() => {}) }
   }, [finished])
 
   if (error) return (
@@ -299,18 +304,33 @@ export default function Session({ mode = 'daily', resume = false, dailyBookId = 
             )}
           </div>
         )}
-        {!feedback && !written && (
+        {!feedback && !written && (mode === 'placement' ? (
           <div className="answer-actions">
             <button className="primary wide" disabled={selected === null} onClick={() => submit()}>
               ثبت پاسخ <span className="kbd-hint">(Enter)</span>
             </button>
             <button className="ghost wide" onClick={() => submit(0)}>نمی‌دانم، حل را نشانم بده</button>
           </div>
-        )}
+        ) : (
+          <div className="answer-actions">
+            <button className="primary wide" disabled={selected === null} onClick={() => submit(selected, 'sure')}>
+              مطمئنم، ثبت کن <span className="kbd-hint">(Enter)</span>
+            </button>
+            <button className="wide unsure-btn" disabled={selected === null} onClick={() => submit(selected, 'unsure')}>
+              مطمئن نیستم
+            </button>
+            <button className="ghost wide" onClick={() => submit(0, 'unsure')}>نمی‌دانم، حل را نشانم بده</button>
+          </div>
+        ))}
 
+        {feedback && feedback.correct && (
+          <div className="fx-burst" key={burst} aria-hidden="true">
+            {Array.from({ length: 7 }, (_, i) => <i key={i} />)}
+          </div>
+        )}
         {feedback && (
           <div className="feedback" aria-live="polite">
-            <div className={`feedback-banner ${feedback.correct ? 'ok' : 'no'}`}>
+            <div className={`feedback-banner pop ${feedback.correct ? 'ok' : 'no'}`}>
               {feedback.correct ? 'درست بود' : feedback.dontKnow ? 'اشکالی ندارد، حل را ببین' : 'اشتباه بود'}
               <span className="muted"> · {fa(feedback.time_s)} ثانیه</span>
             </div>

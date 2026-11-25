@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react'
 import { get, post } from './api'
 import { fa } from './ui'
 import Icon from './Icons'
+import BookPill from './BookPill'
 
 const DOT = { learned: 'learned', review: 'learning', wrong: 'wrong', new: '' }
 
 // «مسیر»: every chapter of the plan on one line. One action per chapter:
 // placement test if nothing is started, otherwise practise that chapter.
-export default function Path({ onPlacement, onPractice, onStartWrong, onEditPlan }) {
+export default function Path({ bookId, onOpenBookMenu, onPlacement, onPractice, onStartWrong, onEditPlan }) {
   const [books, setBooks] = useState(null)
   const [wrong, setWrong] = useState(0)
   const [error, setError] = useState('')
@@ -15,12 +16,14 @@ export default function Path({ onPlacement, onPractice, onStartWrong, onEditPlan
   const load = () => {
     setError('')
     Promise.all([get('/me/books'), get('/auth/me/stats')]).then(async ([bs, st]) => {
+      // مسیر is per book: show only the book selected in the side menu (fall back to all)
+      const mine = bookId && bs.some(b => b.book_id === bookId) ? bs.filter(b => b.book_id === bookId) : bs
       setWrong(st.wrong_count || 0)
-      const chapters = await Promise.all(bs.map(b => get(`/curriculum/books/${encodeURIComponent(b.book_id)}/chapters`)))
-      setBooks(bs.map((b, i) => ({ ...b, chapters: chapters[i] })))
+      const chapters = await Promise.all(mine.map(b => get(`/curriculum/books/${encodeURIComponent(b.book_id)}/chapters`)))
+      setBooks(mine.map((b, i) => ({ ...b, chapters: chapters[i] })))
     }).catch(e => setError(e.message))
   }
-  useEffect(load, [])
+  useEffect(load, [bookId])
 
   function practise(ch) {
     localStorage.setItem('practice_chapters', JSON.stringify([ch.chapter_id]))
@@ -38,13 +41,13 @@ export default function Path({ onPlacement, onPractice, onStartWrong, onEditPlan
 
   return (
     <div className="pk">
-      <header className="pk-top"><h1 className="page-title" style={{ color: 'var(--text)' }}>مسیر</h1>
+      <header className="pk-top"><BookPill bookId={bookId} onClick={onOpenBookMenu} />
         <button className="link-btn" onClick={onEditPlan}>تغییر کتاب‌ها</button></header>
 
       {!books.length && <p className="pk-meta">هنوز کتابی در برنامه‌ات نیست. «تغییر کتاب‌ها» را بزن.</p>}
       {books.map(b => (
         <section key={b.book_id}>
-          <h2 className="pt-book">{b.name}</h2>
+          {books.length > 1 && <h2 className="pt-book">{b.name}</h2>}
           <ol className="pt">
             {b.chapters.map(ch => {
               const learned = ch.counts.learned, started = ch.total - ch.counts.new

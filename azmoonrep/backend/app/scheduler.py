@@ -511,7 +511,8 @@ def _feedback(q: dict, perm, correct_opt, correct: bool) -> dict:
             "solution_md": remap_solution(q.get("solution_md"), perm)}
 
 
-def answer_slot(student: dict, session: dict, index: int, selected_option, time_ms: int):
+def answer_slot(student: dict, session: dict, index: int, selected_option, time_ms: int,
+                confidence: str | None = None):
     """selected_option is in DISPLAY numbering (what the student saw)"""
     slots = session["slots"]
     if index < 0 or index >= len(slots):
@@ -546,6 +547,8 @@ def answer_slot(student: dict, session: dict, index: int, selected_option, time_
         "selected_display": selected_option, "kind": slot.get("kind"),
         # for the retention metric: was this a spaced check after a long interval?
         "prior_interval_days": st.get("prior_interval"), "schedule_applied": st.get("applied"),
+        # calibration signal: did the student KNOW they knew it? ("sure"/"unsure"/None)
+        "confidence": confidence,
         "context": "daily", "answered_at": clock.now_utc()})
     maybe_calibrate_question(q["_id"])
 

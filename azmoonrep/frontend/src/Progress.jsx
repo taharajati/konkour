@@ -25,17 +25,20 @@ function Heatmap({ days }) {
 }
 
 // «پیشرفت»: where the student stands, what to fix, what comes tomorrow
-export default function Progress({ onStartWrong }) {
+export default function Progress({ bookId, onStartWrong, onPracticeConcepts }) {
   const [p, setP] = useState(null)
   const [wrong, setWrong] = useState(0)
   const [error, setError] = useState('')
+  const [dangerous, setDangerous] = useState(null)
   const load = () => {
     setError('')
-    Promise.all([get('/auth/me/progress'), get('/auth/me/stats')])
-      .then(([pr, st]) => { setP(pr); setWrong(st.wrong_count || 0) })
+    // پیشرفت is per book: the backend narrows the key-point scope when book_id is given
+    const q = bookId ? `?book_id=${encodeURIComponent(bookId)}` : ''
+    Promise.all([get('/auth/me/progress' + q), get('/auth/me/stats'), get('/auth/me/dangerous')])
+      .then(([pr, st, dg]) => { setP(pr); setWrong(st.wrong_count || 0); setDangerous(dg) })
       .catch(e => setError(e.message))
   }
-  useEffect(load, [])
+  useEffect(load, [bookId])
 
   if (error) return <div className="pk"><p className="error" role="alert">{error}</p><button onClick={load}>دوباره امتحان کن</button></div>
   if (!p) return <div className="pk"><div className="card skeleton" style={{ height: 300, marginTop: 20 }} /></div>
@@ -97,6 +100,27 @@ export default function Progress({ onStartWrong }) {
             ))}
           </ul>
           <p className="pk-meta">این‌ها را سیستم زودتر و بیشتر برایت می‌آورد؛ لازم نیست کاری بکنی.</p>
+        </section>
+      )}
+
+      {dangerous && dangerous.length > 0 && (
+        <section className="pg-block dangerous">
+          <h2 className="section-title">خطرناک‌ترین نکته‌هایت ⚠️</h2>
+          <p className="pk-meta">اینجا <b>مطمئن بودی</b> و اشتباه زدی — دقیقاً همین‌ها سر جلسه خطرناک‌اند و بیشترین ارزش مطالعه را دارند.</p>
+          <ul className="pg-weak">
+            {dangerous.map(d => (
+              <li key={d.concept_id}>
+                <div><b>{d.title}</b><span className="muted">{d.book_name ? d.book_name + ' · ' : ''}{d.chapter_title}</span></div>
+                <div className="dg-side">
+                  <span className="pg-lapse num">{fa(d.confident_wrong)} بار</span>
+                  <button onClick={() => onPracticeConcepts([d.concept_id])}>تمرین</button>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="pt-actions" style={{ marginTop: 8 }}>
+            <button onClick={() => onPracticeConcepts(dangerous.map(d => d.concept_id))}>تمرین همهٔ این نکته‌ها</button>
+          </div>
         </section>
       )}
 

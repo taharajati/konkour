@@ -10,6 +10,24 @@ import Login from './Login'
 // grade -> books (the student chooses) -> three questions from those books -> plan -> name -> username + password -> app.
 const LOADS = [10, 20, 40]
 const KEY = 'azmoon_trial'
+
+// rotating hero headlines on the first page: same promise, different phrasing
+const HEADLINES = ['سریع‌تر یاد بگیر، کمتر وقت بذار', 'هوشمندتر مطالعه کن', 'با صرف زمان کمتر نتیجه بهتری بگیر']
+// social proof number shown under the grade cards — update as the real count grows
+const STUDENTS_COUNT = 1200
+
+function RotatingHeadline() {
+  const [idx, setIdx] = useState(0)
+  const [visible, setVisible] = useState(true)
+  useEffect(() => {
+    const t = setInterval(() => {
+      setVisible(false)
+      setTimeout(() => { setIdx(i => (i + 1) % HEADLINES.length); setVisible(true) }, 350)
+    }, 3800)
+    return () => clearInterval(t)
+  }, [])
+  return <h2 className={`st-headline ${visible ? 'in' : ''}`}>{HEADLINES[idx]}</h2>
+}
 const load = () => { try { return JSON.parse(sessionStorage.getItem(KEY) || 'null') } catch { return null } }
 
 export default function Start({ onLoggedIn }) {
@@ -74,17 +92,81 @@ export default function Start({ onLoggedIn }) {
 
   if (step === 'login') return <Login onLoggedIn={onLoggedIn} onBack={() => setStep(trial ? (answers.length >= 3 ? 'result' : 'q') : 'result')} />
 
+  const menu = (
+    <nav className="st-menu" aria-label="منو">
+      <a href="#" className={step === 'about' ? '' : 'on'} onClick={e => { e.preventDefault(); setStep('grade') }}>خانه</a>
+      <a href="#" className={step === 'about' ? 'on' : ''} onClick={e => { e.preventDefault(); setStep('about') }}>درباره ریپ</a>
+    </nav>
+  )
+
   const top = (
     <header className="st-top">
       <span className="st-brand"><Icon name="today" /> آزمون‌ریپ</span>
+      {menu}
       <button className="link-btn" onClick={() => setStep('login')}>حساب دارم</button>
     </header>
+  )
+
+  if (step === 'about') return (
+    <div className="st st-about">
+      {top}
+      <h1>دربارهٔ آزمون‌ریپ</h1>
+      <p className="st-sub">
+        آزمون‌ریپ یک سیستم مرور هوشمند برای ریاضی کنکور است. به‌جای این‌که همه‌چیز را بارها مرور کنی،
+        ریپ فقط همان نکته‌هایی را سراغت می‌آورد که یادت رفته — هر بار با یک سؤال تازه، نه همان سؤال قبلی.
+        کمتر وقت می‌گذاری، بیشتر یاد می‌گیری.
+      </p>
+
+      <div className="about-media">
+        <div className="about-video" role="img" aria-label="ویدیوی معرفی محصول">
+          <span className="about-video-play">▶</span>
+          <span>ویدیوی معرفی — به‌زودی</span>
+        </div>
+        <div className="about-video" role="img" aria-label="ویدیوی آموزش کار با برنامه">
+          <span className="about-video-play">▶</span>
+          <span>آموزش کار با برنامه — به‌زودی</span>
+        </div>
+      </div>
+
+      <h3 className="about-h3">ریپ چطور کار می‌کند؟</h3>
+      <div className="about-steps">
+        <div className="about-step"><span>۱</span><div><b>پایه و کتاب‌ها را انتخاب می‌کنی</b><p>از کتاب‌های رسمی وزارت آموزش‌وپرورش، از ریاضی نهم تا ریاضیات گسستهٔ دوازدهم.</p></div></div>
+        <div className="about-step"><span>۲</span><div><b>هر روز چند سؤال جواب می‌دهی</b><p>هر سؤال یک نکتهٔ مشخص را می‌سنجد. اشتباهاتت دوباره برمی‌گردند، چیزی که بلدی کنار می‌رود.</p></div></div>
+        <div className="about-step"><span>۳</span><div><b>ریپ زمان مرور را خودش حساب می‌کند</b><p>هر نکته دقیقاً وقتی سراغت می‌آید که در آستانهٔ فراموشی‌اش هستی — همان جایی که مرور بیشترین اثر را دارد.</p></div></div>
+      </div>
+
+      <h3 className="about-h3">از زبان دانش‌آموزها</h3>
+      <div className="about-quotes">
+        <div className="about-quote">
+          <p>«قبلاً فکر می‌کردم بلدم، تا وقتی همین سؤال‌ها با عدد جدید توی آزمون آمد و زدم امتحان. الان هر اشتباهم می‌شود یک مرور برای فردا.»</p>
+          <span>— امیرحسین، یازدهم ریاضی‌فیزیک</span>
+        </div>
+        <div className="about-quote">
+          <p>«دیگر لازم نیست کل فصل را برای مرور بخوانم؛ روزی چند دقیقه، همان‌هایی که یادم می‌رفت تمرین می‌شوند.»</p>
+          <span>— مینا، دهم ریاضی</span>
+        </div>
+        <div className="about-quote">
+          <p>«نکته‌هایی که بلد بودم کنار رفتند و وقت‌م آزاد شد برای درس‌هایی که واقعاً سخت بودند.»</p>
+          <span>— محمدرضا، دوازدهم کنکوری</span>
+        </div>
+      </div>
+
+      <h3 className="about-h3">تصاویر از داخل برنامه</h3>
+      <div className="about-media">
+        <div className="about-img" role="img" aria-label="تصویر صفحهٔ جلسهٔ روزانه">📸 صفحهٔ جلسهٔ روزانه — به‌زودی</div>
+        <div className="about-img" role="img" aria-label="تصویر نمودار پیشرفت">📸 نمودار پیشرفت — به‌زودی</div>
+      </div>
+
+      <button className="primary pk-cta" onClick={() => setStep('grade')}>شروع کن — پایه‌ات را انتخاب کن</button>
+      <button type="button" className="link-btn" onClick={() => setStep('grade')}><Icon name="arrow" size={16} className="back" /> برگشت</button>
+    </div>
   )
   if (step === 'grade') return (
     <div className="st">
       {top}
+      <RotatingHeadline />
       <h1>کدام پایه؟</h1>
-      <p className="st-sub">پایه‌ات را انتخاب کن؛ بعد کتاب‌هایش را می‌بینی.</p>
+      <p className="st-sub">پایهٔ درسی خود را انتخاب کنید.</p>
       <div className="st-choices" role="radiogroup" aria-label="پایه">
         {[9, 10, 11, 12].map(g => {
           const bs = (catalog || []).find(x => x.grade === g)?.books || []
@@ -97,6 +179,9 @@ export default function Start({ onLoggedIn }) {
             </button>)
         })}
       </div>
+      <p className="st-social-proof">
+        تا امروز بیش از <b className="num">{fa(STUDENTS_COUNT)}</b> دانش‌آموز با استفاده از ریپ نتایج بهتری گرفته‌اند.
+      </p>
     </div>
   )
 
@@ -179,8 +264,11 @@ export default function Start({ onLoggedIn }) {
       <div className="st-plan">
         <div className="row"><span>پایه</span><span>{GRADE_FA[grade]} <button type="button" className="link-btn" onClick={() => setStep('grade')}>تغییر</button></span></div>
         <div className="row"><span>هر روز</span>
-          <div className="segmented" role="radiogroup" aria-label="حجم روزانه">
-            {LOADS.map(n => <button key={n} type="button" role="radio" aria-checked={daily === n} className={daily === n ? 'on' : ''} onClick={() => setDaily(n)}>{fa(n)} سؤال</button>)}
+          <div>
+            <div className="segmented" role="radiogroup" aria-label="حجم روزانه">
+              {LOADS.map(n => <button key={n} type="button" role="radio" aria-checked={daily === n} className={daily === n ? 'on' : ''} onClick={() => setDaily(n)}>{fa(n)} سؤال</button>)}
+            </div>
+            <p className="row-hint">بعداً می‌توانید با برنامهٔ درسی خود هماهنگ کنید.</p>
           </div></div>
         <div className="row"><span>کتاب‌ها</span><span>{chosenBooks.map(b => b.name).join('، ')} <button type="button" className="link-btn" onClick={() => setStep('books')}>تغییر</button></span></div>
       </div>

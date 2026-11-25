@@ -14,6 +14,9 @@ import Admin from './Admin'
 import Onboarding from './Onboarding'
 import Icon, { ICON_NAMES } from './Icons'
 import Mascot from './Mascot'
+import BookMenu from './BookMenu'
+import AppMenu from './AppMenu'
+import ExamSession from './ExamSession'
 
 // Tiny hash router: #/today  #/path  #/settings  #/plan  #/kit
 function useHashRoute() {
@@ -45,7 +48,12 @@ export default function App() {
   const [profile, setProfile] = useState(null)
   const [route, go] = useHashRoute()
   const [session, setSession] = useState(null)   // {mode, resume, placementChapterId}
+  const [activeBookId, setActiveBookId] = useState(() => localStorage.getItem('active_book') || null)
+  const [bookMenu, setBookMenu] = useState(false)
+  const [appMenu, setAppMenu] = useState(false)
   const view = route[0]
+
+  const selectBook = (id) => { setActiveBookId(id); localStorage.setItem('active_book', id) }
 
   const refreshProfile = () => get('/auth/me').then(p => { setProfile(p); return p })
   useEffect(() => {
@@ -75,33 +83,48 @@ export default function App() {
     setSession(null)
     if (window.history.state?.session) window.history.back()
   }
+  const startWrong = () => setSession({ mode: 'practice', resume: true })
+  const startDaily = () => setSession({ mode: 'daily', dailyBookId: activeBookId || null })
+  const startExam = () => setSession({ mode: 'exam' })
+  const startConceptPractice = (conceptIds) => {
+    localStorage.setItem('practice_concepts', JSON.stringify(conceptIds))
+    localStorage.removeItem('practice_chapters')
+    localStorage.setItem('practice_count', String(Math.max(10, conceptIds.length * 3)))
+    setSession({ mode: 'practice' })
+  }
   // accounts made without the start flow (username sign-up): pick books once
   if (!profile.onboarded && !session) {
     return <Onboarding onDone={async () => { await refreshProfile(); go('today') }} />
   }
   if (session) {
+    if (session.mode === 'exam')
+      return <ExamSession key={session.key || 'exam'} onExit={endSession} onPracticeConcepts={startConceptPractice} />
     return <Session key={JSON.stringify(session)} mode={session.mode} resume={!!session.resume}
       placementChapterId={session.placementChapterId || null} onExit={endSession} />
   }
 
   const navView = ['path', 'today', 'progress'].includes(view) ? view : view === 'mistakes' ? 'progress' : null
-  const startWrong = () => setSession({ mode: 'practice', resume: true })
   return (
     <>
+      <BookMenu open={bookMenu} activeBookId={activeBookId} onSelect={selectBook} onClose={() => setBookMenu(false)} />
+      <AppMenu open={appMenu} onClose={() => setAppMenu(false)}
+        onNavigate={(r) => go(r)} onLogout={logout} />
       <main>
-        {view === 'path' ? <Path
+        {view === 'path' ? <Path bookId={activeBookId} onOpenBookMenu={() => setBookMenu(true)}
             onPlacement={(chapterId) => setSession({ mode: 'placement', placementChapterId: chapterId })}
             onPractice={() => setSession({ mode: 'practice' })}
             onStartWrong={() => setSession({ mode: 'practice', resume: true })}
             onEditPlan={() => go('plan')} />
-          : view === 'progress' ? <Progress onStartWrong={startWrong} />
+          : view === 'progress' ? <Progress bookId={activeBookId} onStartWrong={startWrong} onPracticeConcepts={startConceptPractice} />
           : view === 'mistakes' ? <Mistakes onStartWrong={startWrong} />
           : view === 'help' ? <Help />
           : view === 'settings' ? <Settings user={profile} onSaved={refreshProfile} onEditPlan={() => go('plan')} onLogout={logout} />
           : view === 'plan' ? <Onboarding edit initialChapters={profile.scope_chapter_ids || []}
               initialBooks={profile.scope_book_ids || []}
               onDone={async () => { await refreshProfile(); go('path') }} />
-          : <Today user={profile} onStartSession={() => setSession({ mode: 'daily' })} onOpenPath={() => go('path')} />}
+          : <Today user={profile} bookId={activeBookId} onSelectBook={selectBook}
+              onOpenBookMenu={() => setBookMenu(true)} onOpenAppMenu={() => setAppMenu(true)}
+              onStartSession={startDaily} onStartReview={startWrong} onStartExam={startExam} onOpenPath={() => go('path')} />}
       </main>
       <nav className="bottom-nav" aria-label="بخش‌های اصلی">
         {NAV.map(([id, label]) => (

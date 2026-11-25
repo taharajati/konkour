@@ -1,26 +1,43 @@
 import React, { useEffect, useState } from 'react'
-import { post } from './api'
+import { get, post } from './api'
 import { fa, jalali, daysUntil } from './ui'
 import Mascot from './Mascot'
+import Icon from './Icons'
 
 const WEEKDAY_FA = ['د', 'س', 'چ', 'پ', 'ج', 'ش', 'ی']   // Python weekday(): Monday = 0
 
-// design/DESIGN.md: one hero number, one green button. Everything else is quiet.
-export default function Today({ user, onStartSession, onOpenPath }) {
+// «امروز» is per book. The book pill in the header shows the active book; tapping it
+// opens the side menu to switch books.
+export default function Today({ user, bookId, onSelectBook, onOpenBookMenu, onOpenAppMenu, onStartSession, onStartReview, onStartExam, onOpenPath }) {
   const [plan, setPlan] = useState(null)
+  const [books, setBooks] = useState(null)
   const [error, setError] = useState('')
-  const load = () => { setError(''); post('/sessions/daily', {}).then(setPlan).catch(e => setError(e.message)) }
-  useEffect(load, [])
+
+  const load = () => {
+    setError('')
+    post('/sessions/daily', { book_id: bookId || null }).then(setPlan).catch(e => setError(e.message))
+  }
+  useEffect(load, [bookId])
+  useEffect(() => { get('/me/books').then(bs => {
+    setBooks(bs)
+    // no book chosen yet (first visit): default to the first one in the plan
+    if (!bookId && bs.length) onSelectBook(bs[0].book_id)
+  }).catch(() => setBooks([])) }, [bookId])
 
   const toExam = daysUntil(user.exam_date)
+  const activeBook = (books || []).find(b => b.book_id === bookId)
   const top = (
     <header className="pk-top">
-      <span>{new Date().toLocaleDateString('fa-IR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+      <button className="pk-book-pill" onClick={onOpenBookMenu} aria-haspopup="dialog" aria-label="تغییر کتاب">
+        {activeBook && <img onError={e => { e.currentTarget.style.visibility = 'hidden' }} src={activeBook.cover} alt="" loading="lazy" />}
+        <span>{activeBook?.name || 'انتخاب کتاب'}</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M6 9l6 6 6-6" /></svg>
+      </button>
       <span className="who">
         {plan?.streak_days >= 2 && <span className="pk-streak num" title="روزهای پیاپی با تمرین">{fa(plan.streak_days)} روز پیاپی</span>}
         {toExam !== null && toExam >= 0 && <span className="num">{fa(toExam)} روز تا آزمون</span>}
         {toExam === null && <a className="pk-examlink" href="#/settings">تاریخ آزمون را بگذار</a>}
-        <a className="pk-avatar" href="#/settings" aria-label="تنظیمات">{(user.display_name || '؟').slice(0, 1)}</a>
+        <button className="pk-avatar" onClick={onOpenAppMenu} aria-label="منو" aria-haspopup="dialog"><Icon name="user" size={20} /></button>
       </span>
     </header>
   )
@@ -37,6 +54,7 @@ export default function Today({ user, onStartSession, onOpenPath }) {
   return (
     <div className="pk">
       {top}
+
       <section className="pk-hero" aria-labelledby="today-title">
         {plan.total === 0 ? (
           <>
@@ -49,7 +67,10 @@ export default function Today({ user, onStartSession, onOpenPath }) {
             <div className="pk-hero-row"><div><span className="pk-big num">{fa(plan.total)}</span></div><Mascot mood="happy" /></div>
             <h1 id="today-title" className="pk-unit">سؤال امروز را تمام کردی</h1>
             <p className="pk-meta">فردا نکته‌های موعددار برمی‌گردند.</p>
-            <button className="primary pk-cta" onClick={onOpenPath}>دیدن مسیر</button>
+            <div className="pk-cta-row">
+              <button className="primary pk-cta" onClick={onOpenPath}>دیدن مسیر</button>
+              <button className="pk-cta-ghost" onClick={onStartSession}>مرور قبلی‌ها</button>
+            </div>
           </>
         ) : (
           <>
@@ -57,7 +78,11 @@ export default function Today({ user, onStartSession, onOpenPath }) {
             <h1 id="today-title" className="pk-unit">سؤال امروز</h1>
             <p className="pk-meta">حدود {fa(plan.est_minutes)} دقیقه · {fa(plan.review_count + plan.remediation_count)} مرور، {fa(plan.new_count)} نکتهٔ تازه</p>
             {missed > 0 && <p className="pk-accent">{fa(missed)} نکته را دیروز اشتباه زدی؛ دوباره می‌آیند.</p>}
-            <button className="primary pk-cta" onClick={onStartSession}>{plan.done > 0 ? 'ادامه' : 'شروع'}</button>
+            <div className="pk-cta-row">
+              <button className="primary pk-cta" onClick={onStartSession}>{plan.done > 0 ? 'ادامه' : 'شروع'}</button>
+              <button className="pk-cta-ghost" onClick={onStartReview}>مرور قبلی‌ها</button>
+            </div>
+            <button className="pk-cta-exam" onClick={onStartExam}>آزمون آزمایشی — ۲۰ سؤال، زمان‌دار</button>
           </>
         )}
       </section>
