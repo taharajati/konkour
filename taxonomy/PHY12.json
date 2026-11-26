@@ -102,7 +102,7 @@
   {
    "id": "PHY12_ch2_l1_k1",
    "lesson_id": "PHY12_ch2_l1",
-   "order": 1,
+   "order": 10,
    "prereqs": [],
    "title": "تکانه و نیروی متوسط",
    "key_point": "تکانهٔ جسم برابر $\\vec p=m\\vec v$ است و نیروی خالص برابر آهنگ تغییر تکانه: $\\vec F_{net}=\\frac{\\Delta\\vec p}{\\Delta t}$. تکانه برداری است؛ اگر توپ برگردد، تغییر تکانه برابر $m(v_2+v_1)$ است (نه تفاضل تندی‌ها). مثال: $m=2\\ \\text{kg}$ که تندی‌اش از $3$ به $-3\\ \\text{m/s}$ برسد، $\\Delta p=-12$ دارد."
@@ -110,7 +110,7 @@
   {
    "id": "PHY12_ch2_l1_k2",
    "lesson_id": "PHY12_ch2_l1",
-   "order": 2,
+   "order": 11,
    "prereqs": [
     "PHY12_ch2_l1_k1"
    ],
@@ -120,7 +120,7 @@
   {
    "id": "PHY12_ch2_l1_k3",
    "lesson_id": "PHY12_ch2_l1",
-   "order": 3,
+   "order": 12,
    "prereqs": [],
    "title": "قانون دوم نیوتن و برآیند نیروها",
    "key_point": "شتاب جسم برابر $\\vec a=\\frac{\\vec F_{net}}{m}$ و هم‌جهت با برآیند برداری نیروهاست. نیروها را برداری جمع کنید، نه جبری؛ مثلاً دو نیروی عمود بر هم $6$ و $8$ نیوتن برآیند $10$ نیوتن می‌دهند. دام رایج: تقسیم نکردن بر جرم یا جمع اندازه‌ها بدون توجه به جهت."
@@ -128,7 +128,7 @@
   {
    "id": "PHY12_ch2_l2_k4",
    "lesson_id": "PHY12_ch2_l2",
-   "order": 4,
+   "order": 13,
    "prereqs": [
     "PHY12_ch2_l1_k3"
    ],
@@ -138,7 +138,7 @@
   {
    "id": "PHY12_ch2_l2_k5",
    "lesson_id": "PHY12_ch2_l2",
-   "order": 5,
+   "order": 14,
    "prereqs": [
     "PHY12_ch2_l1_k3"
    ],
@@ -148,7 +148,7 @@
   {
    "id": "PHY12_ch2_l2_k6",
    "lesson_id": "PHY12_ch2_l2",
-   "order": 6,
+   "order": 15,
    "prereqs": [
     "PHY12_ch2_l1_k3",
     "PHY12_ch2_l2_k5"
@@ -159,7 +159,7 @@
   {
    "id": "PHY12_ch2_l3_k7",
    "lesson_id": "PHY12_ch2_l3",
-   "order": 7,
+   "order": 16,
    "prereqs": [],
    "title": "تندی، دوره و شتاب در حرکت دایره‌ای یکنواخت",
    "key_point": "در حرکت دایره‌ای یکنواخت $v=\\frac{2\\pi r}{T}=2\\pi rf$، $\\omega=\\frac{2\\pi}{T}$ و شتاب مرکزگرا $a_c=\\frac{v^2}{r}=\\omega^2r$ است. تندی ثابت است ولی سرعت (جهت) تغییر می‌کند؛ پس سرعت متوسط با تندی متوسط فرق دارد. دام رایج: یکی گرفتن $v$ و $\\omega$ برای نقاط با شعاع‌های متفاوت."
@@ -167,7 +167,7 @@
   {
    "id": "PHY12_ch2_l3_k8",
    "lesson_id": "PHY12_ch2_l3",
-   "order": 8,
+   "order": 17,
    "prereqs": [
     "PHY12_ch2_l3_k7",
     "PHY12_ch2_l1_k3"
@@ -178,7 +178,7 @@
   {
    "id": "PHY12_ch2_l3_k9",
    "lesson_id": "PHY12_ch2_l3",
-   "order": 9,
+   "order": 18,
    "prereqs": [
     "PHY12_ch2_l3_k7"
    ],
@@ -188,7 +188,7 @@
   {
    "id": "PHY12_ch3_l1_k1",
    "lesson_id": "PHY12_ch3_l1",
-   "order": 1,
+   "order": 19,
    "prereqs": [],
    "title": "معادلهٔ مکان در حرکت هماهنگ ساده",
    "key_point": "در حرکت هماهنگ ساده مکان نوسانگر به‌صورت $x=A\\cos(\\omega t+\\varphi)$ است، با $\\omega=\\frac{2\\pi}{T}=2\\pi f$. مثلاً اگر $\\omega=10\\pi\\ \\mathrm{rad/s}$ باشد، $T=0.2\\ \\mathrm{s}$ است. دام رایج: اشتباه گرفتن $f$ و $T$ یا $\\omega$ و $f$، و فراموش‌کردن فاز اولیه و جهت حرکت هنگام تعیین $\\varphi$."
@@ -196,7 +196,7 @@
   {
    "id": "PHY12_ch3_l1_k2",
    "lesson_id": "PHY12_ch3_l1",
-   "order": 2,
+   "order": 20,
    "prereqs": [
     "PHY12_ch3_l1_k1"
    ],
@@ -206,7 +206,7 @@
   {
    "id": "PHY12_ch3_l1_k3",
    "lesson_id": "PHY12_ch3_l1",
-   "order": 3,
+   "order": 21,
    "prereqs": [
     "PHY12_ch3_l1_k1"
    ],
@@ -216,7 +216,7 @@
   {
    "id": "PHY12_ch3_l1_k4",
    "lesson_id": "PHY12_ch3_l1",
-   "order": 4,
+   "order": 22,
    "prereqs": [
     "PHY12_ch3_l1_k2"
    ],
@@ -226,7 +226,7 @@
   {
    "id": "PHY12_ch3_l2_k1",
    "lesson_id": "PHY12_ch3_l2",
-   "order": 1,
+   "order": 23,
    "prereqs": [],
    "title": "طول موج، بسامد و تندی موج",
    "key_point": "برای هر موج $v=\\lambda f$؛ بسامد را منبع تعیین می‌کند و هنگام ورود به محیط دیگر ثابت می‌ماند، ولی $v$ و $\\lambda$ هم‌نسبت تغییر می‌کنند. فاصلهٔ دو نقطه $\\Delta x$ اختلاف فاز $2\\pi\\frac{\\Delta x}{\\lambda}$ دارد. دام رایج: ثابت‌گرفتن طول موج و شمردن اشتباه طول‌های موج بین قله‌ها."
@@ -234,7 +234,7 @@
   {
    "id": "PHY12_ch3_l2_k2",
    "lesson_id": "PHY12_ch3_l2",
-   "order": 2,
+   "order": 24,
    "prereqs": [
     "PHY12_ch3_l2_k1"
    ],
@@ -244,7 +244,7 @@
   {
    "id": "PHY12_ch3_l2_k3",
    "lesson_id": "PHY12_ch3_l2",
-   "order": 3,
+   "order": 25,
    "prereqs": [
     "PHY12_ch3_l2_k1"
    ],
@@ -254,7 +254,7 @@
   {
    "id": "PHY12_ch3_l3_k1",
    "lesson_id": "PHY12_ch3_l3",
-   "order": 1,
+   "order": 26,
    "prereqs": [],
    "title": "شدت صوت",
    "key_point": "شدت صوت $I=\\frac{P}{A}$ است و برای چشمهٔ نقطه‌ای در فضای آزاد $I=\\frac{P}{4\\pi r^2}$؛ پس با ۲ برابر شدن فاصله، شدت $\\frac14$ می‌شود. همچنین $I\\propto A^2f^2$. دام رایج: متناسب‌گرفتن شدت با $\\frac1r$ و تبدیل‌نکردن $\\mathrm{cm^2}$ به $\\mathrm{m^2}$."
@@ -262,7 +262,7 @@
   {
    "id": "PHY12_ch3_l3_k2",
    "lesson_id": "PHY12_ch3_l3",
-   "order": 2,
+   "order": 27,
    "prereqs": [
     "PHY12_ch3_l3_k1"
    ],
@@ -272,7 +272,7 @@
   {
    "id": "PHY12_ch3_l3_k3",
    "lesson_id": "PHY12_ch3_l3",
-   "order": 3,
+   "order": 28,
    "prereqs": [
     "PHY12_ch3_l2_k1"
    ],
@@ -282,7 +282,7 @@
   {
    "id": "PHY12_ch4_l1_k1",
    "lesson_id": "PHY12_ch4_l1",
-   "order": 1,
+   "order": 29,
    "prereqs": [],
    "title": "قانون بازتاب و وارونگی تپ",
    "key_point": "در بازتاب موج، زاویهٔ بازتاب با زاویهٔ تابش برابر است و هر دو نسبت به خط عمود بر سطح سنجیده می‌شوند. تندی، بسامد و طول موج بازتابیده با موج فرودی یکسان است. بازتاب تپ از انتهای ثابت آن را وارونه می‌کند ولی از انتهای آزاد ناوارونه است. دام رایج: زاویه با خود سطح را زاویهٔ تابش گرفتن."
@@ -290,7 +290,7 @@
   {
    "id": "PHY12_ch4_l1_k2",
    "lesson_id": "PHY12_ch4_l1",
-   "order": 2,
+   "order": 30,
    "prereqs": [
     "PHY12_ch4_l1_k1"
    ],
@@ -300,7 +300,7 @@
   {
    "id": "PHY12_ch4_l1_k3",
    "lesson_id": "PHY12_ch4_l1",
-   "order": 3,
+   "order": 31,
    "prereqs": [
     "PHY12_ch4_l1_k2"
    ],
@@ -310,7 +310,7 @@
   {
    "id": "PHY12_ch4_l2_k1",
    "lesson_id": "PHY12_ch4_l2",
-   "order": 4,
+   "order": 32,
    "prereqs": [
     "PHY12_ch4_l1_k2"
    ],
@@ -320,7 +320,7 @@
   {
    "id": "PHY12_ch4_l2_k2",
    "lesson_id": "PHY12_ch4_l2",
-   "order": 5,
+   "order": 33,
    "prereqs": [
     "PHY12_ch4_l2_k1"
    ],
@@ -330,7 +330,7 @@
   {
    "id": "PHY12_ch4_l2_k3",
    "lesson_id": "PHY12_ch4_l2",
-   "order": 6,
+   "order": 34,
    "prereqs": [
     "PHY12_ch4_l2_k1"
    ],
@@ -340,7 +340,7 @@
   {
    "id": "PHY12_ch4_l3_k1",
    "lesson_id": "PHY12_ch4_l3",
-   "order": 7,
+   "order": 35,
    "prereqs": [
     "PHY12_ch4_l2_k1"
    ],
@@ -350,7 +350,7 @@
   {
    "id": "PHY12_ch4_l3_k2",
    "lesson_id": "PHY12_ch4_l3",
-   "order": 8,
+   "order": 36,
    "prereqs": [
     "PHY12_ch4_l3_k1"
    ],
@@ -360,7 +360,7 @@
   {
    "id": "PHY12_ch4_l3_k3",
    "lesson_id": "PHY12_ch4_l3",
-   "order": 9,
+   "order": 37,
    "prereqs": [
     "PHY12_ch4_l3_k2"
    ],
@@ -370,7 +370,7 @@
   {
    "id": "PHY12_ch4_l3_k4",
    "lesson_id": "PHY12_ch4_l3",
-   "order": 10,
+   "order": 38,
    "prereqs": [
     "PHY12_ch4_l3_k3"
    ],
@@ -380,7 +380,7 @@
   {
    "id": "PHY12_ch5_l1_k1",
    "lesson_id": "PHY12_ch5_l1",
-   "order": 1,
+   "order": 39,
    "prereqs": [],
    "title": "مدل‌های تامسون و رادرفورد",
    "key_point": "تامسون اتم را کره‌ای با بار مثبت یکنواخت و الکترون‌های درون آن می‌دانست؛ اما در آزمایش رادرفورد برخی ذره‌های آلفا با زاویهٔ بزرگ بازتاب شدند و بیشترشان بی‌انحراف گذشتند. پس اتم هسته‌ای کوچک، چگال و مثبت دارد و بیشتر حجمش خالی است. در نزدیک‌ترین فاصلهٔ برخورد مستقیم، $K=\\frac{k(2e)(Ze)}{d}$. دام رایج: اشتباه گرفتن اندازهٔ هسته ($10^{-14}\\ \\text{m}$) با اندازهٔ اتم ($10^{-10}\\ \\text{m}$)."
@@ -388,7 +388,7 @@
   {
    "id": "PHY12_ch5_l1_k2",
    "lesson_id": "PHY12_ch5_l1",
-   "order": 2,
+   "order": 40,
    "prereqs": [
     "PHY12_ch5_l1_k1"
    ],
@@ -398,7 +398,7 @@
   {
    "id": "PHY12_ch5_l1_k3",
    "lesson_id": "PHY12_ch5_l1",
-   "order": 3,
+   "order": 41,
    "prereqs": [
     "PHY12_ch5_l1_k2"
    ],
@@ -408,7 +408,7 @@
   {
    "id": "PHY12_ch5_l2_k1",
    "lesson_id": "PHY12_ch5_l2",
-   "order": 1,
+   "order": 42,
    "prereqs": [
     "PHY12_ch5_l1_k3"
    ],
@@ -418,7 +418,7 @@
   {
    "id": "PHY12_ch5_l2_k2",
    "lesson_id": "PHY12_ch5_l2",
-   "order": 2,
+   "order": 43,
    "prereqs": [
     "PHY12_ch5_l2_k1"
    ],
@@ -428,7 +428,7 @@
   {
    "id": "PHY12_ch5_l2_k3",
    "lesson_id": "PHY12_ch5_l2",
-   "order": 3,
+   "order": 44,
    "prereqs": [
     "PHY12_ch5_l2_k2"
    ],
@@ -438,7 +438,7 @@
   {
    "id": "PHY12_ch5_l3_k1",
    "lesson_id": "PHY12_ch5_l3",
-   "order": 1,
+   "order": 45,
    "prereqs": [
     "PHY12_ch5_l2_k3"
    ],
@@ -448,7 +448,7 @@
   {
    "id": "PHY12_ch5_l3_k2",
    "lesson_id": "PHY12_ch5_l3",
-   "order": 2,
+   "order": 46,
    "prereqs": [
     "PHY12_ch5_l3_k1"
    ],
@@ -458,7 +458,7 @@
   {
    "id": "PHY12_ch5_l3_k3",
    "lesson_id": "PHY12_ch5_l3",
-   "order": 3,
+   "order": 47,
    "prereqs": [
     "PHY12_ch5_l3_k2"
    ],
@@ -468,7 +468,7 @@
   {
    "id": "PHY12_ch6_l1_k1",
    "lesson_id": "PHY12_ch6_l1",
-   "order": 1,
+   "order": 48,
    "prereqs": [],
    "title": "ترکیب هسته و ایزوتوپ‌ها",
    "key_point": "هسته از پروتون و نوترون (نوکلئون) ساخته شده است: $Z$ تعداد پروتون‌ها، $N$ تعداد نوترون‌ها و $A=Z+N$ عدد جرمی. ایزوتوپ‌ها $Z$ یکسان و $A$ (یا $N$) متفاوت دارند، مثل $^{12}_{6}\\mathrm{C}$ و $^{14}_{6}\\mathrm{C}$. دام رایج: در یون، تعداد الکترون‌ها برابر $Z$ منهای بار یون است، نه $Z$."
@@ -476,7 +476,7 @@
   {
    "id": "PHY12_ch6_l1_k2",
    "lesson_id": "PHY12_ch6_l1",
-   "order": 2,
+   "order": 49,
    "prereqs": [
     "PHY12_ch6_l1_k1"
    ],
@@ -486,7 +486,7 @@
   {
    "id": "PHY12_ch6_l1_k3",
    "lesson_id": "PHY12_ch6_l1",
-   "order": 3,
+   "order": 50,
    "prereqs": [
     "PHY12_ch6_l1_k1"
    ],
@@ -496,7 +496,7 @@
   {
    "id": "PHY12_ch6_l1_k4",
    "lesson_id": "PHY12_ch6_l1",
-   "order": 4,
+   "order": 51,
    "prereqs": [
     "PHY12_ch6_l1_k1"
    ],
@@ -506,7 +506,7 @@
   {
    "id": "PHY12_ch6_l2_k1",
    "lesson_id": "PHY12_ch6_l2",
-   "order": 5,
+   "order": 52,
    "prereqs": [
     "PHY12_ch6_l1_k1"
    ],
@@ -516,7 +516,7 @@
   {
    "id": "PHY12_ch6_l2_k2",
    "lesson_id": "PHY12_ch6_l2",
-   "order": 6,
+   "order": 53,
    "prereqs": [],
    "title": "قانون نیمه‌عمر",
    "key_point": "نیمه‌عمر $T$ زمانی است که نیمی از هسته‌های پرتوزا واپاشیده شوند: $N=N_0\\left(\\frac12\\right)^{t/T}$. مثلاً پس از $3T$ فقط $\\frac18$ هسته‌ها می‌مانند. دام رایج: شمردن تعداد نیمه‌عمرها یا اشتباه گرفتن کسر باقی‌مانده با کسر واپاشیده‌شده."
@@ -524,7 +524,7 @@
   {
    "id": "PHY12_ch6_l2_k3",
    "lesson_id": "PHY12_ch6_l2",
-   "order": 7,
+   "order": 54,
    "prereqs": [
     "PHY12_ch6_l2_k2"
    ],
@@ -534,7 +534,7 @@
   {
    "id": "PHY12_ch6_l3_k1",
    "lesson_id": "PHY12_ch6_l3",
-   "order": 8,
+   "order": 55,
    "prereqs": [
     "PHY12_ch6_l2_k1",
     "PHY12_ch6_l1_k4"
@@ -545,7 +545,7 @@
   {
    "id": "PHY12_ch6_l3_k2",
    "lesson_id": "PHY12_ch6_l3",
-   "order": 9,
+   "order": 56,
    "prereqs": [
     "PHY12_ch6_l3_k1"
    ],

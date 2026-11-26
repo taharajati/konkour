@@ -40,7 +40,7 @@
   {
    "id": "CHE11_ch1_l2_k1",
    "lesson_id": "CHE11_ch1_l2",
-   "order": 1,
+   "order": 4,
    "prereqs": [
     "CHE11_ch1_l1_k2"
    ],
@@ -50,7 +50,7 @@
   {
    "id": "CHE11_ch1_l2_k2",
    "lesson_id": "CHE11_ch1_l2",
-   "order": 2,
+   "order": 5,
    "prereqs": [
     "CHE11_ch1_l2_k1"
    ],
@@ -60,7 +60,7 @@
   {
    "id": "CHE11_ch1_l2_k3",
    "lesson_id": "CHE11_ch1_l2",
-   "order": 3,
+   "order": 6,
    "prereqs": [
     "CHE11_ch1_l2_k2"
    ],
@@ -70,7 +70,7 @@
   {
    "id": "CHE11_ch1_l3_k1",
    "lesson_id": "CHE11_ch1_l3",
-   "order": 1,
+   "order": 7,
    "prereqs": [
     "CHE11_ch1_l1_k1"
    ],
@@ -80,7 +80,7 @@
   {
    "id": "CHE11_ch1_l3_k2",
    "lesson_id": "CHE11_ch1_l3",
-   "order": 2,
+   "order": 8,
    "prereqs": [
     "CHE11_ch1_l3_k1"
    ],
@@ -90,7 +90,7 @@
   {
    "id": "CHE11_ch1_l4_k1",
    "lesson_id": "CHE11_ch1_l4",
-   "order": 1,
+   "order": 9,
    "prereqs": [
     "CHE11_ch1_l3_k1"
    ],
@@ -100,7 +100,7 @@
   {
    "id": "CHE11_ch1_l4_k2",
    "lesson_id": "CHE11_ch1_l4",
-   "order": 2,
+   "order": 10,
    "prereqs": [
     "CHE11_ch1_l4_k1"
    ],
@@ -110,7 +110,7 @@
   {
    "id": "CHE11_ch2_l1_k1",
    "lesson_id": "CHE11_ch2_l1",
-   "order": 1,
+   "order": 11,
    "prereqs": [],
    "title": "گرمای ویژه و ظرفیت گرمایی",
    "key_point": "دما معیاری از میانگین انرژی جنبشی ذره‌ها است، ولی گرما انرژی در حال انتقال بر اثر اختلاف دما است. برای تغییر دمای یک ماده بدون تغییر حالت داریم $Q=mc\\Delta\\theta$ که $c$ گرمای ویژه و $C=mc$ ظرفیت گرمایی است (ظرفیت گرمایی مولی برابر $Mc$ است). مثال: برای گرم کردن $100\\,g$ آب با $c=4.2\\,J\\cdot g^{-1}\\cdot{}^{\\circ}C^{-1}$ به اندازهٔ $10\\,^{\\circ}C$ به $4200\\,J$ گرما نیاز است. دام رایج: به جای تغییر دما، دمای پایانی را در رابطه نگذارید."
@@ -118,7 +118,7 @@
   {
    "id": "CHE11_ch2_l1_k2",
    "lesson_id": "CHE11_ch2_l1",
-   "order": 2,
+   "order": 12,
    "prereqs": [
     "CHE11_ch2_l1_k1"
    ],
@@ -128,7 +128,7 @@
   {
    "id": "CHE11_ch2_l2_k1",
    "lesson_id": "CHE11_ch2_l2",
-   "order": 1,
+   "order": 13,
    "prereqs": [
     "CHE11_ch2_l1_k1"
    ],
@@ -138,7 +138,7 @@
   {
    "id": "CHE11_ch2_l2_k2",
    "lesson_id": "CHE11_ch2_l2",
-   "order": 2,
+   "order": 14,
    "prereqs": [
     "CHE11_ch2_l2_k1"
    ],
@@ -148,7 +148,7 @@
   {
    "id": "CHE11_ch2_l2_k3",
    "lesson_id": "CHE11_ch2_l2",
-   "order": 3,
+   "order": 15,
    "prereqs": [
     "CHE11_ch2_l2_k2"
    ],
@@ -158,7 +158,7 @@
   {
    "id": "CHE11_ch2_l2_k4",
    "lesson_id": "CHE11_ch2_l2",
-   "order": 4,
+   "order": 16,
    "prereqs": [
     "CHE11_ch2_l2_k1"
    ],
@@ -168,7 +168,7 @@
   {
    "id": "CHE11_ch2_l3_k1",
    "lesson_id": "CHE11_ch2_l3",
-   "order": 1,
+   "order": 17,
    "prereqs": [],
    "title": "سرعت متوسط واکنش",
    "key_point": "سرعت متوسط، تغییر مقدار (مول یا غلظت) یک ماده در بازهٔ زمانی است: $\\bar{R}=\\frac{|\\Delta n|}{\\Delta t}$ یا $\\frac{|\\Delta[A]|}{\\Delta t}$. برای واکنش‌دهنده $\\Delta$ منفی است و سرعت را مثبت گزارش می‌کنیم. مثال: کاهش غلظت از $0.5$ به $0.3$ مول بر لیتر در $20$ ثانیه، سرعت $0.01\\,mol\\cdot L^{-1}\\cdot s^{-1}$ می‌دهد. دام رایج: ناهماهنگی یکاهای زمان و فراموش کردن حجم ظرف؛ سرعت معمولاً با گذشت زمان کم می‌شود."
@@ -176,7 +176,7 @@
   {
    "id": "CHE11_ch2_l3_k2",
    "lesson_id": "CHE11_ch2_l3",
-   "order": 2,
+   "order": 18,
    "prereqs": [
     "CHE11_ch2_l3_k1"
    ],
@@ -186,7 +186,7 @@
   {
    "id": "CHE11_ch2_l3_k3",
    "lesson_id": "CHE11_ch2_l3",
-   "order": 3,
+   "order": 19,
    "prereqs": [
     "CHE11_ch2_l3_k1"
    ],
@@ -196,7 +196,7 @@
   {
    "id": "CHE11_ch2_l3_k4",
    "lesson_id": "CHE11_ch2_l3",
-   "order": 4,
+   "order": 20,
    "prereqs": [
     "CHE11_ch2_l2_k1",
     "CHE11_ch2_l3_k3"
@@ -207,7 +207,7 @@
   {
    "id": "CHE11_ch3_l1_k1",
    "lesson_id": "CHE11_ch3_l1",
-   "order": 1,
+   "order": 21,
    "prereqs": [],
    "title": "الیاف طبیعی، ساختگی و درشت‌مولکول‌ها",
    "key_point": "الیاف پوشاک یا طبیعی‌اند (پنبه، پشم، ابریشم) یا ساختگی که بیشتر از مواد نفتی ساخته می‌شوند (پلی‌استر، نایلون). درشت‌مولکول جرم مولی بسیار زیادی دارد؛ پلیمر درشت‌مولکولی است که از تکرار پیاپی واحدهای کوچک ساخته شده است، مانند سلولز (بخش اصلی پنبه) با واحد $\\mathrm{C_6H_{10}O_5}$ که از گلوکز و با جدا شدن آب پدید می‌آید. دام: درشت‌مولکول را همیشه ساختگی یا هر مولکول نسبتاً بزرگی مثل چربی را پلیمر دانستن."
@@ -215,7 +215,7 @@
   {
    "id": "CHE11_ch3_l1_k2",
    "lesson_id": "CHE11_ch3_l1",
-   "order": 2,
+   "order": 22,
    "prereqs": [
     "CHE11_ch3_l1_k1"
    ],
@@ -225,7 +225,7 @@
   {
    "id": "CHE11_ch3_l1_k3",
    "lesson_id": "CHE11_ch3_l1",
-   "order": 3,
+   "order": 23,
    "prereqs": [
     "CHE11_ch3_l1_k2"
    ],
@@ -235,7 +235,7 @@
   {
    "id": "CHE11_ch3_l1_k4",
    "lesson_id": "CHE11_ch3_l1",
-   "order": 4,
+   "order": 24,
    "prereqs": [
     "CHE11_ch3_l1_k2"
    ],
@@ -245,7 +245,7 @@
   {
    "id": "CHE11_ch3_l2_k1",
    "lesson_id": "CHE11_ch3_l2",
-   "order": 1,
+   "order": 25,
    "prereqs": [],
    "title": "الکل‌ها، کربوکسیلیک اسیدها و انحلال‌پذیری",
    "key_point": "الکل‌ها گروه هیدروکسیل ($\\mathrm{-OH}$) و کربوکسیلیک اسیدها گروه کربوکسیل ($\\mathrm{-COOH}$) دارند و پیوند هیدروژنی تشکیل می‌دهند. الکل‌ها و اسیدهای کوچک در آب خوب حل می‌شوند، اما با بلند شدن زنجیر، بخش ناقطبی غالب می‌شود؛ مثلاً اتانول برخلاف ۱-اوکتانول به هر نسبتی در آب حل می‌شود. ویتامین‌های دارای گروه‌های $\\mathrm{OH}$ فراوان محلول در آب‌اند. دام: فقط به وجود یک گروه قطبی توجه کردن."
@@ -253,7 +253,7 @@
   {
    "id": "CHE11_ch3_l2_k2",
    "lesson_id": "CHE11_ch3_l2",
-   "order": 2,
+   "order": 26,
    "prereqs": [
     "CHE11_ch3_l2_k1"
    ],
@@ -263,7 +263,7 @@
   {
    "id": "CHE11_ch3_l2_k3",
    "lesson_id": "CHE11_ch3_l2",
-   "order": 3,
+   "order": 27,
    "prereqs": [
     "CHE11_ch3_l2_k2"
    ],
@@ -273,7 +273,7 @@
   {
    "id": "CHE11_ch3_l3_k1",
    "lesson_id": "CHE11_ch3_l3",
-   "order": 1,
+   "order": 28,
    "prereqs": [
     "CHE11_ch3_l2_k3"
    ],
@@ -283,7 +283,7 @@
   {
    "id": "CHE11_ch3_l3_k2",
    "lesson_id": "CHE11_ch3_l3",
-   "order": 2,
+   "order": 29,
    "prereqs": [
     "CHE11_ch3_l2_k3"
    ],
@@ -293,7 +293,7 @@
   {
    "id": "CHE11_ch3_l3_k3",
    "lesson_id": "CHE11_ch3_l3",
-   "order": 3,
+   "order": 30,
    "prereqs": [
     "CHE11_ch3_l3_k1",
     "CHE11_ch3_l3_k2"
@@ -304,7 +304,7 @@
   {
    "id": "CHE11_ch3_l4_k1",
    "lesson_id": "CHE11_ch3_l4",
-   "order": 1,
+   "order": 31,
    "prereqs": [
     "CHE11_ch3_l3_k3"
    ],
@@ -314,7 +314,7 @@
   {
    "id": "CHE11_ch3_l4_k2",
    "lesson_id": "CHE11_ch3_l4",
-   "order": 2,
+   "order": 32,
    "prereqs": [
     "CHE11_ch3_l4_k1"
    ],

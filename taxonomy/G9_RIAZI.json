@@ -289,7 +289,7 @@
   {
    "id": "G9_RIAZI_ch3_l1_k1",
    "lesson_id": "G9_RIAZI_ch3_l1",
-   "order": 1,
+   "order": 29,
    "prereqs": [],
    "title": "استدلال استقرایی و قیاسی",
    "key_point": "در استدلال استقرایی از چند مثال خاص یک الگو یا حدس کلی می‌سازیم؛ این نتیجه فقط یک حدس است و حتی با ده‌ها مثال درست هم ثابت نمی‌شود. در استدلال قیاسی از حکم‌های کلی پذیرفته‌شده با منطق به نتیجه‌ای قطعی می‌رسیم. مثال: دیدن $1+3=4$ و $1+3+5=9$ و حدس «مجموع $n$ عدد فرد اول برابر $n^2$ است» استقرایی است."
@@ -297,7 +297,7 @@
   {
    "id": "G9_RIAZI_ch3_l1_k2",
    "lesson_id": "G9_RIAZI_ch3_l1",
-   "order": 2,
+   "order": 30,
    "prereqs": [
     "G9_RIAZI_ch3_l1_k1"
    ],
@@ -307,7 +307,7 @@
   {
    "id": "G9_RIAZI_ch3_l2_k1",
    "lesson_id": "G9_RIAZI_ch3_l2",
-   "order": 1,
+   "order": 31,
    "prereqs": [
     "G9_RIAZI_ch3_l1_k2"
    ],
@@ -317,7 +317,7 @@
   {
    "id": "G9_RIAZI_ch3_l2_k2",
    "lesson_id": "G9_RIAZI_ch3_l2",
-   "order": 2,
+   "order": 32,
    "prereqs": [],
    "title": "زاویه‌ها در اثبات",
    "key_point": "در اثبات‌ها این حقایق را به‌کار می‌بریم: زاویه‌های متقابل به رأس برابرند؛ دو زاویهٔ مجاور روی خط راست مکمل‌اند؛ مجموع زاویه‌های داخلی مثلث $180^\\circ$ است؛ زاویهٔ خارجی مثلث برابر مجموع دو زاویهٔ داخلی غیرمجاور است؛ در دو خط موازی زاویه‌های متبادل برابرند. مثال: دو زاویهٔ داخلی $50^\\circ$ و $60^\\circ$ یعنی زاویهٔ سوم $70^\\circ$."
@@ -325,7 +325,7 @@
   {
    "id": "G9_RIAZI_ch3_l3_k1",
    "lesson_id": "G9_RIAZI_ch3_l3",
-   "order": 1,
+   "order": 33,
    "prereqs": [
     "G9_RIAZI_ch3_l2_k1"
    ],
@@ -335,7 +335,7 @@
   {
    "id": "G9_RIAZI_ch3_l3_k2",
    "lesson_id": "G9_RIAZI_ch3_l3",
-   "order": 2,
+   "order": 34,
    "prereqs": [
     "G9_RIAZI_ch3_l3_k1"
    ],
@@ -345,7 +345,7 @@
   {
    "id": "G9_RIAZI_ch3_l4_k1",
    "lesson_id": "G9_RIAZI_ch3_l4",
-   "order": 1,
+   "order": 35,
    "prereqs": [
     "G9_RIAZI_ch3_l2_k2",
     "G9_RIAZI_ch3_l3_k2"
@@ -356,7 +356,7 @@
   {
    "id": "G9_RIAZI_ch3_l4_k2",
    "lesson_id": "G9_RIAZI_ch3_l4",
-   "order": 2,
+   "order": 36,
    "prereqs": [
     "G9_RIAZI_ch3_l4_k1"
    ],
@@ -366,7 +366,7 @@
   {
    "id": "G9_RIAZI_ch3_l5_k1",
    "lesson_id": "G9_RIAZI_ch3_l5",
-   "order": 1,
+   "order": 37,
    "prereqs": [
     "G9_RIAZI_ch3_l3_k2"
    ],
@@ -376,7 +376,7 @@
   {
    "id": "G9_RIAZI_ch3_l5_k2",
    "lesson_id": "G9_RIAZI_ch3_l5",
-   "order": 2,
+   "order": 38,
    "prereqs": [
     "G9_RIAZI_ch3_l5_k1"
    ],
@@ -386,7 +386,7 @@
   {
    "id": "G9_RIAZI_ch3_l5_k3",
    "lesson_id": "G9_RIAZI_ch3_l5",
-   "order": 3,
+   "order": 39,
    "prereqs": [
     "G9_RIAZI_ch3_l5_k1",
     "G9_RIAZI_ch3_l2_k2"
@@ -397,7 +397,7 @@
   {
    "id": "G9_RIAZI_ch4_l1_k1",
    "lesson_id": "G9_RIAZI_ch4_l1",
-   "order": 1,
+   "order": 40,
    "prereqs": [],
    "title": "تعریف توان صحیح",
    "key_point": "برای $a\\neq0$: $a^0=1$ و $a^{-n}=\\frac{1}{a^n}$. مثلاً $2^{-3}=\\frac18$. دقت کن $-3^2=-9$ ولی $(-3)^2=9$، و توان منفی عدد را منفی نمی‌کند، فقط معکوس می‌کند."
@@ -405,7 +405,7 @@
   {
    "id": "G9_RIAZI_ch4_l1_k2",
    "lesson_id": "G9_RIAZI_ch4_l1",
-   "order": 2,
+   "order": 41,
    "prereqs": [
     "G9_RIAZI_ch4_l1_k1"
    ],
@@ -415,7 +415,7 @@
   {
    "id": "G9_RIAZI_ch4_l1_k3",
    "lesson_id": "G9_RIAZI_ch4_l1",
-   "order": 3,
+   "order": 42,
    "prereqs": [
     "G9_RIAZI_ch4_l1_k2"
    ],
@@ -425,7 +425,7 @@
   {
    "id": "G9_RIAZI_ch4_l2_k1",
    "lesson_id": "G9_RIAZI_ch4_l2",
-   "order": 1,
+   "order": 43,
    "prereqs": [
     "G9_RIAZI_ch4_l1_k3"
    ],
@@ -435,7 +435,7 @@
   {
    "id": "G9_RIAZI_ch4_l2_k2",
    "lesson_id": "G9_RIAZI_ch4_l2",
-   "order": 2,
+   "order": 44,
    "prereqs": [
     "G9_RIAZI_ch4_l2_k1"
    ],
@@ -445,7 +445,7 @@
   {
    "id": "G9_RIAZI_ch4_l3_k1",
    "lesson_id": "G9_RIAZI_ch4_l3",
-   "order": 1,
+   "order": 45,
    "prereqs": [
     "G9_RIAZI_ch4_l1_k1"
    ],
@@ -455,7 +455,7 @@
   {
    "id": "G9_RIAZI_ch4_l3_k2",
    "lesson_id": "G9_RIAZI_ch4_l3",
-   "order": 2,
+   "order": 46,
    "prereqs": [
     "G9_RIAZI_ch4_l3_k1"
    ],
@@ -465,7 +465,7 @@
   {
    "id": "G9_RIAZI_ch4_l4_k1",
    "lesson_id": "G9_RIAZI_ch4_l4",
-   "order": 1,
+   "order": 47,
    "prereqs": [
     "G9_RIAZI_ch4_l3_k1"
    ],
@@ -475,7 +475,7 @@
   {
    "id": "G9_RIAZI_ch4_l4_k2",
    "lesson_id": "G9_RIAZI_ch4_l4",
-   "order": 2,
+   "order": 48,
    "prereqs": [
     "G9_RIAZI_ch4_l4_k1"
    ],
@@ -485,7 +485,7 @@
   {
    "id": "G9_RIAZI_ch4_l5_k1",
    "lesson_id": "G9_RIAZI_ch4_l5",
-   "order": 1,
+   "order": 49,
    "prereqs": [
     "G9_RIAZI_ch4_l4_k2"
    ],
@@ -495,7 +495,7 @@
   {
    "id": "G9_RIAZI_ch4_l5_k2",
    "lesson_id": "G9_RIAZI_ch4_l5",
-   "order": 2,
+   "order": 50,
    "prereqs": [
     "G9_RIAZI_ch4_l5_k1"
    ],
@@ -505,7 +505,7 @@
   {
    "id": "G9_RIAZI_ch5_l1_k1",
    "lesson_id": "G9_RIAZI_ch5_l1",
-   "order": 1,
+   "order": 51,
    "prereqs": [],
    "title": "ساده‌کردن و ضرب عبارت‌های جبری",
    "key_point": "جمله‌های همانند (دارای بخش حرفی یکسان) را با جمع یا تفریق ضرایب ساده می‌کنیم: $3x+5x=8x$. در ضرب، ضرایب را در هم ضرب و توان‌های هم‌پایه را جمع می‌کنیم: $(2x^2)(3x)=6x^3$. در ضرب چندجمله‌ای‌ها هر جمله را در همهٔ جمله‌های دیگر ضرب کنید و مراقب علامت منفیِ پشت پرانتز باشید."
@@ -513,7 +513,7 @@
   {
    "id": "G9_RIAZI_ch5_l1_k2",
    "lesson_id": "G9_RIAZI_ch5_l1",
-   "order": 2,
+   "order": 52,
    "prereqs": [
     "G9_RIAZI_ch5_l1_k1"
    ],
@@ -523,7 +523,7 @@
   {
    "id": "G9_RIAZI_ch5_l1_k3",
    "lesson_id": "G9_RIAZI_ch5_l1",
-   "order": 3,
+   "order": 53,
    "prereqs": [
     "G9_RIAZI_ch5_l1_k1"
    ],
@@ -533,7 +533,7 @@
   {
    "id": "G9_RIAZI_ch5_l2_k1",
    "lesson_id": "G9_RIAZI_ch5_l2",
-   "order": 4,
+   "order": 54,
    "prereqs": [
     "G9_RIAZI_ch5_l1_k1"
    ],
@@ -543,7 +543,7 @@
   {
    "id": "G9_RIAZI_ch5_l2_k2",
    "lesson_id": "G9_RIAZI_ch5_l2",
-   "order": 5,
+   "order": 55,
    "prereqs": [
     "G9_RIAZI_ch5_l1_k1"
    ],
@@ -553,7 +553,7 @@
   {
    "id": "G9_RIAZI_ch5_l2_k3",
    "lesson_id": "G9_RIAZI_ch5_l2",
-   "order": 6,
+   "order": 56,
    "prereqs": [
     "G9_RIAZI_ch5_l1_k2",
     "G9_RIAZI_ch5_l1_k3",
@@ -565,7 +565,7 @@
   {
    "id": "G9_RIAZI_ch5_l2_k4",
    "lesson_id": "G9_RIAZI_ch5_l2",
-   "order": 7,
+   "order": 57,
    "prereqs": [
     "G9_RIAZI_ch5_l1_k2",
     "G9_RIAZI_ch5_l1_k3"
@@ -576,7 +576,7 @@
   {
    "id": "G9_RIAZI_ch5_l3_k1",
    "lesson_id": "G9_RIAZI_ch5_l3",
-   "order": 8,
+   "order": 58,
    "prereqs": [],
    "title": "حل نامعادلهٔ درجهٔ اول",
    "key_point": "نامعادله را مثل معادله حل می‌کنیم: هر عدد را به دو طرف اضافه یا از دو طرف کم می‌کنیم و دو طرف را بر ضریب $x$ تقسیم می‌کنیم. مثلاً $3x-5\\le 7\\Rightarrow 3x\\le12\\Rightarrow x\\le4$. جواب یک مجموعهٔ بی‌شمار عضوی است؛ پس برای عددهای صحیح یا طبیعی باید مرز و خود نماد ($<$ یا $\\le$) را بررسی کرد."
@@ -584,7 +584,7 @@
   {
    "id": "G9_RIAZI_ch5_l3_k2",
    "lesson_id": "G9_RIAZI_ch5_l3",
-   "order": 9,
+   "order": 59,
    "prereqs": [
     "G9_RIAZI_ch5_l3_k1"
    ],
@@ -594,7 +594,7 @@
   {
    "id": "G9_RIAZI_ch5_l3_k3",
    "lesson_id": "G9_RIAZI_ch5_l3",
-   "order": 10,
+   "order": 60,
    "prereqs": [
     "G9_RIAZI_ch5_l3_k1",
     "G9_RIAZI_ch5_l3_k2"
@@ -605,7 +605,7 @@
   {
    "id": "G9_RIAZI_ch6_l1_k1",
    "lesson_id": "G9_RIAZI_ch6_l1",
-   "order": 1,
+   "order": 61,
    "prereqs": [],
    "title": "نقطه روی خط",
    "key_point": "نقطه‌ای روی خط است که مختصاتش در معادلهٔ خط صدق کند: $x$ و $y$ نقطه را در معادله بگذار و ببین برابری برقرار است یا نه. مثلاً $(2,5)$ روی خط $y=2x+1$ است، چون $2\\times 2+1=5$. دام رایج: جابه‌جا گذاشتن $x$ و $y$ یا اشتباه در علامت."
@@ -613,7 +613,7 @@
   {
    "id": "G9_RIAZI_ch6_l1_k2",
    "lesson_id": "G9_RIAZI_ch6_l1",
-   "order": 2,
+   "order": 62,
    "prereqs": [
     "G9_RIAZI_ch6_l1_k1"
    ],
@@ -623,7 +623,7 @@
   {
    "id": "G9_RIAZI_ch6_l1_k3",
    "lesson_id": "G9_RIAZI_ch6_l1",
-   "order": 3,
+   "order": 63,
    "prereqs": [
     "G9_RIAZI_ch6_l1_k1"
    ],
@@ -633,7 +633,7 @@
   {
    "id": "G9_RIAZI_ch6_l2_k1",
    "lesson_id": "G9_RIAZI_ch6_l2",
-   "order": 1,
+   "order": 64,
    "prereqs": [
     "G9_RIAZI_ch6_l1_k1"
    ],
@@ -643,7 +643,7 @@
   {
    "id": "G9_RIAZI_ch6_l2_k2",
    "lesson_id": "G9_RIAZI_ch6_l2",
-   "order": 2,
+   "order": 65,
    "prereqs": [
     "G9_RIAZI_ch6_l2_k1"
    ],
@@ -653,7 +653,7 @@
   {
    "id": "G9_RIAZI_ch6_l2_k3",
    "lesson_id": "G9_RIAZI_ch6_l2",
-   "order": 3,
+   "order": 66,
    "prereqs": [
     "G9_RIAZI_ch6_l2_k2"
    ],
@@ -663,7 +663,7 @@
   {
    "id": "G9_RIAZI_ch6_l2_k4",
    "lesson_id": "G9_RIAZI_ch6_l2",
-   "order": 4,
+   "order": 67,
    "prereqs": [
     "G9_RIAZI_ch6_l2_k2"
    ],
@@ -673,7 +673,7 @@
   {
    "id": "G9_RIAZI_ch6_l3_k1",
    "lesson_id": "G9_RIAZI_ch6_l3",
-   "order": 1,
+   "order": 68,
    "prereqs": [
     "G9_RIAZI_ch6_l1_k1"
    ],
@@ -683,7 +683,7 @@
   {
    "id": "G9_RIAZI_ch6_l3_k2",
    "lesson_id": "G9_RIAZI_ch6_l3",
-   "order": 2,
+   "order": 69,
    "prereqs": [
     "G9_RIAZI_ch6_l3_k1",
     "G9_RIAZI_ch6_l2_k4"
@@ -694,7 +694,7 @@
   {
    "id": "G9_RIAZI_ch6_l3_k3",
    "lesson_id": "G9_RIAZI_ch6_l3",
-   "order": 3,
+   "order": 70,
    "prereqs": [
     "G9_RIAZI_ch6_l3_k1"
    ],
@@ -704,7 +704,7 @@
   {
    "id": "G9_RIAZI_ch7_l1_k1",
    "lesson_id": "G9_RIAZI_ch7_l1",
-   "order": 1,
+   "order": 71,
    "prereqs": [],
    "title": "تشخیص عبارت گویا",
    "key_point": "عبارت گویا کسری است که صورت و مخرج آن چندجمله‌ای باشند، مثل $\\frac{x+1}{x-2}$؛ وجود $\\sqrt{x}$ یا $|x|$ در صورت یا مخرج آن را غیرگویا می‌کند. این عبارت وقتی معنا دارد که مخرجش صفر نباشد، پس مقادیری که مخرج را صفر کنند باید کنار گذاشته شوند. مثلاً $\\frac{5}{x-3}$ برای $x=3$ تعریف‌نشده است."
@@ -712,7 +712,7 @@
   {
    "id": "G9_RIAZI_ch7_l1_k2",
    "lesson_id": "G9_RIAZI_ch7_l1",
-   "order": 2,
+   "order": 72,
    "prereqs": [
     "G9_RIAZI_ch7_l1_k1"
    ],
@@ -722,7 +722,7 @@
   {
    "id": "G9_RIAZI_ch7_l1_k3",
    "lesson_id": "G9_RIAZI_ch7_l1",
-   "order": 3,
+   "order": 73,
    "prereqs": [
     "G9_RIAZI_ch7_l1_k2"
    ],
@@ -732,7 +732,7 @@
   {
    "id": "G9_RIAZI_ch7_l2_k1",
    "lesson_id": "G9_RIAZI_ch7_l2",
-   "order": 1,
+   "order": 74,
    "prereqs": [
     "G9_RIAZI_ch7_l1_k2"
    ],
@@ -742,7 +742,7 @@
   {
    "id": "G9_RIAZI_ch7_l2_k2",
    "lesson_id": "G9_RIAZI_ch7_l2",
-   "order": 2,
+   "order": 75,
    "prereqs": [
     "G9_RIAZI_ch7_l1_k3"
    ],
@@ -752,7 +752,7 @@
   {
    "id": "G9_RIAZI_ch7_l2_k3",
    "lesson_id": "G9_RIAZI_ch7_l2",
-   "order": 3,
+   "order": 76,
    "prereqs": [
     "G9_RIAZI_ch7_l2_k2"
    ],
@@ -762,7 +762,7 @@
   {
    "id": "G9_RIAZI_ch7_l2_k4",
    "lesson_id": "G9_RIAZI_ch7_l2",
-   "order": 4,
+   "order": 77,
    "prereqs": [
     "G9_RIAZI_ch7_l2_k1",
     "G9_RIAZI_ch7_l2_k3"
@@ -773,7 +773,7 @@
   {
    "id": "G9_RIAZI_ch7_l3_k1",
    "lesson_id": "G9_RIAZI_ch7_l3",
-   "order": 1,
+   "order": 78,
    "prereqs": [
     "G9_RIAZI_ch7_l1_k2"
    ],
@@ -783,7 +783,7 @@
   {
    "id": "G9_RIAZI_ch7_l3_k2",
    "lesson_id": "G9_RIAZI_ch7_l3",
-   "order": 2,
+   "order": 79,
    "prereqs": [
     "G9_RIAZI_ch7_l1_k2",
     "G9_RIAZI_ch7_l3_k1"
@@ -794,7 +794,7 @@
   {
    "id": "G9_RIAZI_ch8_l1_k1",
    "lesson_id": "G9_RIAZI_ch8_l1",
-   "order": 1,
+   "order": 80,
    "prereqs": [],
    "title": "مساحت کره",
    "key_point": "مساحت رویهٔ کره‌ای به شعاع $r$ برابر $S=4\\pi r^2$ است؛ یعنی چهار برابر مساحت دایرهٔ عظیمهٔ آن. مثلاً برای $r=2$ داریم $S=16\\pi$. خطای رایج: فراموش کردن توان دو یا گرفتن قطر به جای شعاع."
@@ -802,7 +802,7 @@
   {
    "id": "G9_RIAZI_ch8_l1_k2",
    "lesson_id": "G9_RIAZI_ch8_l1",
-   "order": 2,
+   "order": 81,
    "prereqs": [
     "G9_RIAZI_ch8_l1_k1"
    ],
@@ -812,7 +812,7 @@
   {
    "id": "G9_RIAZI_ch8_l1_k3",
    "lesson_id": "G9_RIAZI_ch8_l1",
-   "order": 3,
+   "order": 82,
    "prereqs": [
     "G9_RIAZI_ch8_l1_k1",
     "G9_RIAZI_ch8_l1_k2"
@@ -823,7 +823,7 @@
   {
    "id": "G9_RIAZI_ch8_l2_k1",
    "lesson_id": "G9_RIAZI_ch8_l2",
-   "order": 1,
+   "order": 83,
    "prereqs": [],
    "title": "حجم هرم",
    "key_point": "حجم هر هرم برابر $V=\\frac{1}{3}Bh$ است که $B$ مساحت قاعده و $h$ ارتفاع (فاصلهٔ رأس تا صفحهٔ قاعده) است. مثلاً قاعده‌ای به مساحت $12$ و ارتفاع $5$ حجم $20$ می‌دهد. خطاها: فراموش کردن $\\frac{1}{3}$ و گرفتن ارتفاع وجه جانبی به جای ارتفاع هرم."
@@ -831,7 +831,7 @@
   {
    "id": "G9_RIAZI_ch8_l2_k2",
    "lesson_id": "G9_RIAZI_ch8_l2",
-   "order": 2,
+   "order": 84,
    "prereqs": [
     "G9_RIAZI_ch8_l2_k1"
    ],
@@ -841,7 +841,7 @@
   {
    "id": "G9_RIAZI_ch8_l2_k3",
    "lesson_id": "G9_RIAZI_ch8_l2",
-   "order": 3,
+   "order": 85,
    "prereqs": [
     "G9_RIAZI_ch8_l2_k2"
    ],
@@ -851,7 +851,7 @@
   {
    "id": "G9_RIAZI_ch8_l3_k1",
    "lesson_id": "G9_RIAZI_ch8_l3",
-   "order": 1,
+   "order": 86,
    "prereqs": [],
    "title": "مقطع صفحه با جسم",
    "key_point": "مقطع جسم با صفحه به جهت صفحه بستگی دارد: صفحهٔ موازی قاعدهٔ مخروط یا استوانه دایره می‌دهد، صفحهٔ گذرنده از محور استوانه مستطیل و صفحهٔ گذرنده از رأس و محور مخروط مثلث متساوی‌الساقین می‌دهد. هر مقطع کره دایره است و مقطع موازی قاعدهٔ هرم، چندضلعی متشابه قاعده است."
@@ -859,7 +859,7 @@
   {
    "id": "G9_RIAZI_ch8_l3_k2",
    "lesson_id": "G9_RIAZI_ch8_l3",
-   "order": 2,
+   "order": 87,
    "prereqs": [
     "G9_RIAZI_ch8_l2_k2"
    ],
@@ -869,7 +869,7 @@
   {
    "id": "G9_RIAZI_ch8_l3_k3",
    "lesson_id": "G9_RIAZI_ch8_l3",
-   "order": 3,
+   "order": 88,
    "prereqs": [
     "G9_RIAZI_ch8_l1_k2",
     "G9_RIAZI_ch8_l2_k2"
@@ -880,7 +880,7 @@
   {
    "id": "G9_RIAZI_ch8_l3_k4",
    "lesson_id": "G9_RIAZI_ch8_l3",
-   "order": 4,
+   "order": 89,
    "prereqs": [
     "G9_RIAZI_ch8_l1_k1",
     "G9_RIAZI_ch8_l1_k2",

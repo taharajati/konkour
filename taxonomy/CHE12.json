@@ -40,7 +40,7 @@
   {
    "id": "CHE12_ch1_l2_k1",
    "lesson_id": "CHE12_ch1_l2",
-   "order": 1,
+   "order": 4,
    "prereqs": [],
    "title": "اسیدهای قوی و ضعیف و درجهٔ یونش",
    "key_point": "اسید قوی ($\\mathrm{HCl, HNO_3, HClO_4,\\ldots}$) تقریباً کامل یونیده می‌شود، اما اسید ضعیف ($\\mathrm{CH_3COOH, HF, HCN}$) در تعادل است. درجهٔ یونش $\\alpha=\\frac{\\text{مول یونیده}}{\\text{مول حل‌شده}}$ و $[\\mathrm{H^+}]=\\alpha M$. دام: هم‌غلظت بودن را با هم‌قدرت بودن یکی دانستن."
@@ -48,7 +48,7 @@
   {
    "id": "CHE12_ch1_l2_k2",
    "lesson_id": "CHE12_ch1_l2",
-   "order": 2,
+   "order": 5,
    "prereqs": [
     "CHE12_ch1_l2_k1"
    ],
@@ -58,7 +58,7 @@
   {
    "id": "CHE12_ch1_l2_k3",
    "lesson_id": "CHE12_ch1_l2",
-   "order": 3,
+   "order": 6,
    "prereqs": [
     "CHE12_ch1_l2_k2"
    ],
@@ -68,7 +68,7 @@
   {
    "id": "CHE12_ch1_l2_k4",
    "lesson_id": "CHE12_ch1_l2",
-   "order": 4,
+   "order": 7,
    "prereqs": [
     "CHE12_ch1_l2_k3"
    ],
@@ -78,7 +78,7 @@
   {
    "id": "CHE12_ch1_l3_k1",
    "lesson_id": "CHE12_ch1_l3",
-   "order": 1,
+   "order": 8,
    "prereqs": [
     "CHE12_ch1_l2_k2",
     "CHE12_ch1_l2_k3"
@@ -89,7 +89,7 @@
   {
    "id": "CHE12_ch1_l3_k2",
    "lesson_id": "CHE12_ch1_l3",
-   "order": 2,
+   "order": 9,
    "prereqs": [
     "CHE12_ch1_l2_k2"
    ],
@@ -99,7 +99,7 @@
   {
    "id": "CHE12_ch1_l3_k3",
    "lesson_id": "CHE12_ch1_l3",
-   "order": 3,
+   "order": 10,
    "prereqs": [
     "CHE12_ch1_l3_k2"
    ],
@@ -109,7 +109,7 @@
   {
    "id": "CHE12_ch2_l1_k1",
    "lesson_id": "CHE12_ch2_l1",
-   "order": 1,
+   "order": 11,
    "prereqs": [],
    "title": "سرعت متوسط واکنش و ضرایب",
    "key_point": "سرعت متوسط مصرف یا تولید یک ماده برابر تغییر مقدار (یا غلظت) آن بر زمان است: $\\bar R=\\left|\\frac{\\Delta n}{V\\,\\Delta t}\\right|$. سرعت واکنش از تقسیم سرعت هر ماده بر ضریب استوکیومتری آن به دست می‌آید؛ برای $aA\\to bB$ داریم $R=\\frac{R_A}{a}=\\frac{R_B}{b}$. مثلاً در $N_2+3H_2\\to2NH_3$ اگر $R_{H_2}=0.3$ باشد، $R_{NH_3}=0.2$ است. دام رایج: فراموش کردن ضریب، حجم یا یکای زمان."
@@ -117,7 +117,7 @@
   {
    "id": "CHE12_ch2_l1_k2",
    "lesson_id": "CHE12_ch2_l1",
-   "order": 2,
+   "order": 12,
    "prereqs": [
     "CHE12_ch2_l1_k1"
    ],
@@ -127,7 +127,7 @@
   {
    "id": "CHE12_ch2_l2_k1",
    "lesson_id": "CHE12_ch2_l2",
-   "order": 3,
+   "order": 13,
    "prereqs": [
     "CHE12_ch2_l1_k2"
    ],
@@ -137,7 +137,7 @@
   {
    "id": "CHE12_ch2_l2_k2",
    "lesson_id": "CHE12_ch2_l2",
-   "order": 4,
+   "order": 14,
    "prereqs": [
     "CHE12_ch2_l2_k1"
    ],
@@ -147,7 +147,7 @@
   {
    "id": "CHE12_ch2_l2_k3",
    "lesson_id": "CHE12_ch2_l2",
-   "order": 5,
+   "order": 15,
    "prereqs": [
     "CHE12_ch2_l2_k2"
    ],
@@ -157,7 +157,7 @@
   {
    "id": "CHE12_ch2_l2_k4",
    "lesson_id": "CHE12_ch2_l2",
-   "order": 6,
+   "order": 16,
    "prereqs": [
     "CHE12_ch2_l2_k3"
    ],
@@ -167,7 +167,7 @@
   {
    "id": "CHE12_ch2_l3_k1",
    "lesson_id": "CHE12_ch2_l3",
-   "order": 7,
+   "order": 17,
    "prereqs": [
     "CHE12_ch2_l2_k4"
    ],
@@ -177,7 +177,7 @@
   {
    "id": "CHE12_ch2_l3_k2",
    "lesson_id": "CHE12_ch2_l3",
-   "order": 8,
+   "order": 18,
    "prereqs": [
     "CHE12_ch2_l3_k1"
    ],
@@ -187,7 +187,7 @@
   {
    "id": "CHE12_ch2_l3_k3",
    "lesson_id": "CHE12_ch2_l3",
-   "order": 9,
+   "order": 19,
    "prereqs": [
     "CHE12_ch2_l3_k2",
     "CHE12_ch2_l2_k3"
@@ -198,7 +198,7 @@
   {
    "id": "CHE12_ch3_l1_k1",
    "lesson_id": "CHE12_ch3_l1",
-   "order": 1,
+   "order": 20,
    "prereqs": [],
    "title": "عدد اکسایش و شناسایی اکسنده و کاهنده",
    "key_point": "در اکسایش عدد اکسایش **افزایش** و در کاهش **کاهش** می‌یابد. گونه‌ای که اکسید می‌شود، **کاهنده** و گونه‌ای که کاهیده می‌شود، **اکسنده** است؛ مثلاً در $\\mathrm{Zn+Cu^{2+}\\to Zn^{2+}+Cu}$ روی کاهنده و $\\mathrm{Cu^{2+}}$ اکسنده است. عدد اکسایش اتم‌ها را با صفر شدن مجموع (یا برابر شدن با بار یون) به دست آورید و به یاد داشته باشید که تعداد اتم‌های یک عنصر را در فرمول در نظر بگیرید (مثلاً دو کروم در $\\mathrm{Cr_2O_7^{2-}}$)."
@@ -206,7 +206,7 @@
   {
    "id": "CHE12_ch3_l1_k2",
    "lesson_id": "CHE12_ch3_l1",
-   "order": 2,
+   "order": 21,
    "prereqs": [
     "CHE12_ch3_l1_k1"
    ],
@@ -216,7 +216,7 @@
   {
    "id": "CHE12_ch3_l1_k3",
    "lesson_id": "CHE12_ch3_l1",
-   "order": 3,
+   "order": 22,
    "prereqs": [
     "CHE12_ch3_l1_k2"
    ],
@@ -226,7 +226,7 @@
   {
    "id": "CHE12_ch3_l2_k1",
    "lesson_id": "CHE12_ch3_l2",
-   "order": 4,
+   "order": 23,
    "prereqs": [
     "CHE12_ch3_l1_k3"
    ],
@@ -236,7 +236,7 @@
   {
    "id": "CHE12_ch3_l2_k2",
    "lesson_id": "CHE12_ch3_l2",
-   "order": 5,
+   "order": 24,
    "prereqs": [
     "CHE12_ch3_l2_k1"
    ],
@@ -246,7 +246,7 @@
   {
    "id": "CHE12_ch3_l2_k3",
    "lesson_id": "CHE12_ch3_l2",
-   "order": 6,
+   "order": 25,
    "prereqs": [
     "CHE12_ch3_l2_k2"
    ],
@@ -256,7 +256,7 @@
   {
    "id": "CHE12_ch3_l3_k1",
    "lesson_id": "CHE12_ch3_l3",
-   "order": 7,
+   "order": 26,
    "prereqs": [
     "CHE12_ch3_l2_k2"
    ],
@@ -266,7 +266,7 @@
   {
    "id": "CHE12_ch3_l3_k2",
    "lesson_id": "CHE12_ch3_l3",
-   "order": 8,
+   "order": 27,
    "prereqs": [
     "CHE12_ch3_l3_k1"
    ],
@@ -276,7 +276,7 @@
   {
    "id": "CHE12_ch3_l3_k3",
    "lesson_id": "CHE12_ch3_l3",
-   "order": 9,
+   "order": 28,
    "prereqs": [
     "CHE12_ch3_l2_k1"
    ],
@@ -286,7 +286,7 @@
   {
    "id": "CHE12_ch3_l3_k4",
    "lesson_id": "CHE12_ch3_l3",
-   "order": 10,
+   "order": 29,
    "prereqs": [
     "CHE12_ch3_l3_k2",
     "CHE12_ch3_l3_k3"
@@ -297,7 +297,7 @@
   {
    "id": "CHE12_ch4_l1_k1",
    "lesson_id": "CHE12_ch4_l1",
-   "order": 1,
+   "order": 30,
    "prereqs": [],
    "title": "بازده درصدی واکنش",
    "key_point": "بازده درصدی نشان می‌دهد مقدار واقعی فرآورده چند درصد مقدار نظری است: $\\text{بازده}=\\frac{\\text{مقدار واقعی}}{\\text{مقدار نظری}}\\times100$. مقدار نظری را از معادلهٔ موازنه‌شده، با واکنش‌دهندهٔ محدودکننده و پس از کسر ناخالصی حساب می‌کنند. مثلاً نظری $20$ گرم و واقعی $15$ گرم یعنی بازده $75\\%$. دام: وارونه کردن کسر یا محاسبهٔ مقدار نظری از واکنش‌دهندهٔ اضافی."
@@ -305,7 +305,7 @@
   {
    "id": "CHE12_ch4_l1_k2",
    "lesson_id": "CHE12_ch4_l1",
-   "order": 2,
+   "order": 31,
    "prereqs": [
     "CHE12_ch4_l1_k1"
    ],
@@ -315,7 +315,7 @@
   {
    "id": "CHE12_ch4_l1_k3",
    "lesson_id": "CHE12_ch4_l1",
-   "order": 3,
+   "order": 32,
    "prereqs": [
     "CHE12_ch4_l1_k2"
    ],
@@ -325,7 +325,7 @@
   {
    "id": "CHE12_ch4_l2_k1",
    "lesson_id": "CHE12_ch4_l2",
-   "order": 1,
+   "order": 33,
    "prereqs": [],
    "title": "پلیمر افزایشی و درجهٔ پلیمرشدن",
    "key_point": "در پلیمر شدن افزایشی، مونومرهای دارای پیوند $\\mathrm{C=C}$ بدون فرآوردهٔ جانبی به هم می‌پیوندند: $n\\,\\mathrm{CH_2{=}CH_2}\\to[-\\mathrm{CH_2CH_2}-]_n$. پس جرم پلیمر برابر جرم مونومرهای مصرفی است و $n=\\frac{\\text{جرم مولی پلیمر}}{\\text{جرم مولی مونومر}}$. دام: به‌جای جرم مولی $\\mathrm{C_2H_4}$ (برابر $28$) عدد $14$ را به کار بردن."
@@ -333,7 +333,7 @@
   {
    "id": "CHE12_ch4_l2_k2",
    "lesson_id": "CHE12_ch4_l2",
-   "order": 2,
+   "order": 34,
    "prereqs": [
     "CHE12_ch4_l2_k1"
    ],
@@ -343,7 +343,7 @@
   {
    "id": "CHE12_ch4_l2_k3",
    "lesson_id": "CHE12_ch4_l2",
-   "order": 3,
+   "order": 35,
    "prereqs": [
     "CHE12_ch4_l2_k1"
    ],
@@ -353,7 +353,7 @@
   {
    "id": "CHE12_ch4_l3_k1",
    "lesson_id": "CHE12_ch4_l3",
-   "order": 1,
+   "order": 36,
    "prereqs": [],
    "title": "پیل سوختی هیدروژن-اکسیژن",
    "key_point": "در پیل سوختی، $\\mathrm{H_2}$ در آند اکسید و $\\mathrm{O_2}$ در کاتد کاهیده می‌شود و فرآوردهٔ اصلی آب است. در محیط اسیدی: آند $\\mathrm{H_2\\to2H^++2e^-}$ و کاتد $\\mathrm{O_2+4H^++4e^-\\to2H_2O}$؛ به ازای هر $\\mathrm{H_2}$، دو الکترون و به ازای هر $\\mathrm{O_2}$ چهار الکترون. بار $=n_{e}\\times96500$. دام: شمردن تعداد الکترون‌ها برای هر مول گاز."
@@ -361,7 +361,7 @@
   {
    "id": "CHE12_ch4_l3_k2",
    "lesson_id": "CHE12_ch4_l3",
-   "order": 2,
+   "order": 37,
    "prereqs": [
     "CHE12_ch4_l3_k1"
    ],
@@ -371,7 +371,7 @@
   {
    "id": "CHE12_ch4_l3_k3",
    "lesson_id": "CHE12_ch4_l3",
-   "order": 3,
+   "order": 38,
    "prereqs": [
     "CHE12_ch4_l3_k2"
    ],

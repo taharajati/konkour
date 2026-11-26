@@ -108,7 +108,7 @@
   {
    "id": "PHY10_ch2_l1_k1",
    "lesson_id": "PHY10_ch2_l1",
-   "order": 1,
+   "order": 11,
    "prereqs": [],
    "title": "نیروهای بین‌مولکولی، کشش سطحی و مویینگی",
    "key_point": "نیروی بین مولکول‌ها کوتاه‌برد است: اگر کمی از فاصلهٔ معمول دورتر شوند ربایشی و اگر نزدیک‌تر شوند رانشی می‌شود. نیروی بین مولکول‌های همسان **هم‌چسبی** (عامل کشش سطحی و کروی شدن قطره) و بین مولکول‌های ناهمسان **دگرچسبی** است. آب در لولهٔ مویین شیشه‌ای تمیز بالا می‌رود و جیوه پایین می‌ماند؛ هرچه لوله باریک‌تر باشد این اختلاف سطح بیشتر است. دام رایج: گرم کردن مایع یا افزودن مایع ظرف‌شویی کشش سطحی را کم می‌کند، نه زیاد."
@@ -116,7 +116,7 @@
   {
    "id": "PHY10_ch2_l1_k2",
    "lesson_id": "PHY10_ch2_l1",
-   "order": 2,
+   "order": 12,
    "prereqs": [],
    "title": "چگالی، حفره و مخلوط مواد",
    "key_point": "چگالی $\\rho=\\frac{m}{V}$ است و $1\\,\\mathrm{g/cm^3}=1000\\,\\mathrm{kg/m^3}$. چگالی مخلوط برابر کل جرم تقسیم بر کل حجم است: $\\rho=\\frac{m_1+m_2}{V}$. در جسم حفره‌دار، حجم حفره برابر حجم ظاهری منهای $\\frac{m}{\\rho}$ (حجم خودِ ماده) است. دام رایج: میانگین سادهٔ دو چگالی فقط وقتی درست است که حجم‌ها برابر و جمع‌پذیر باشند."
@@ -124,7 +124,7 @@
   {
    "id": "PHY10_ch2_l1_k3",
    "lesson_id": "PHY10_ch2_l1",
-   "order": 3,
+   "order": 13,
    "prereqs": [
     "PHY10_ch2_l1_k2"
    ],
@@ -134,7 +134,7 @@
   {
    "id": "PHY10_ch2_l2_k1",
    "lesson_id": "PHY10_ch2_l2",
-   "order": 1,
+   "order": 14,
    "prereqs": [
     "PHY10_ch2_l1_k2",
     "PHY10_ch2_l1_k3"
@@ -145,7 +145,7 @@
   {
    "id": "PHY10_ch2_l2_k2",
    "lesson_id": "PHY10_ch2_l2",
-   "order": 2,
+   "order": 15,
    "prereqs": [
     "PHY10_ch2_l2_k1"
    ],
@@ -155,7 +155,7 @@
   {
    "id": "PHY10_ch2_l2_k3",
    "lesson_id": "PHY10_ch2_l2",
-   "order": 3,
+   "order": 16,
    "prereqs": [
     "PHY10_ch2_l2_k2"
    ],
@@ -165,7 +165,7 @@
   {
    "id": "PHY10_ch2_l2_k4",
    "lesson_id": "PHY10_ch2_l2",
-   "order": 4,
+   "order": 17,
    "prereqs": [
     "PHY10_ch2_l2_k1"
    ],
@@ -175,7 +175,7 @@
   {
    "id": "PHY10_ch2_l3_k1",
    "lesson_id": "PHY10_ch2_l3",
-   "order": 1,
+   "order": 18,
    "prereqs": [
     "PHY10_ch2_l2_k1"
    ],
@@ -185,7 +185,7 @@
   {
    "id": "PHY10_ch2_l3_k2",
    "lesson_id": "PHY10_ch2_l3",
-   "order": 2,
+   "order": 19,
    "prereqs": [
     "PHY10_ch2_l3_k1"
    ],
@@ -195,7 +195,7 @@
   {
    "id": "PHY10_ch2_l4_k1",
    "lesson_id": "PHY10_ch2_l4",
-   "order": 1,
+   "order": 20,
    "prereqs": [],
    "title": "آهنگ شارش و معادلهٔ پیوستگی",
    "key_point": "در شارش پایای مایع تراکم‌ناپذیر، آهنگ شارش حجمی $Q=Av$ در طول لوله ثابت است: $A_1v_1=A_2v_2$. در انشعاب، $Q$ ورودی برابر مجموع $Q$ شاخه‌هاست. چون $A$ با مربع قطر متناسب است، با نصف شدن قطر تندی $4$ برابر می‌شود. دام رایج: به‌کار بردن نسبت قطرها به‌جای نسبت مساحت‌ها."
@@ -203,7 +203,7 @@
   {
    "id": "PHY10_ch2_l4_k2",
    "lesson_id": "PHY10_ch2_l4",
-   "order": 2,
+   "order": 21,
    "prereqs": [
     "PHY10_ch2_l4_k1"
    ],
@@ -213,7 +213,7 @@
   {
    "id": "PHY10_ch3_l1_k1",
    "lesson_id": "PHY10_ch3_l1",
-   "order": 1,
+   "order": 22,
    "prereqs": [],
    "title": "انرژی جنبشی",
    "key_point": "انرژی جنبشی جسمی به جرم $m$ و تندی $v$ برابر $K=\\frac{1}{2}mv^2$ است؛ کمیتی نرده‌ای و نامنفی که به جهت حرکت بستگی ندارد و یکای آن ژول است. مثلاً اگر تندی دو برابر شود، $K$ چهار برابر می‌شود. دام رایج: جرم باید بر حسب $\\mathrm{kg}$ و تندی بر حسب $\\mathrm{m/s}$ باشد (برای تبدیل از $\\mathrm{km/h}$ بر $3.6$ تقسیم کنید)."
@@ -221,7 +221,7 @@
   {
    "id": "PHY10_ch3_l1_k2",
    "lesson_id": "PHY10_ch3_l1",
-   "order": 2,
+   "order": 23,
    "prereqs": [],
    "title": "کار نیروی ثابت",
    "key_point": "کار نیروی ثابت $F$ در جابه‌جایی $d$ برابر $W=Fd\\cos\\theta$ است که $\\theta$ زاویهٔ بین نیرو و جابه‌جایی است. اگر $\\theta<90^\\circ$ کار مثبت، اگر $\\theta=90^\\circ$ صفر و اگر $\\theta>90^\\circ$ منفی است. مثلاً نیروی $10\\,\\mathrm{N}$ با زاویهٔ $60^\\circ$ در جابه‌جایی $4\\,\\mathrm{m}$ کار $20\\,\\mathrm{J}$ انجام می‌دهد. دام رایج: اگر زاویه نسبت به راستای قائم داده شود، ابتدا زاویه با جابه‌جایی را پیدا کنید."
@@ -229,7 +229,7 @@
   {
    "id": "PHY10_ch3_l1_k3",
    "lesson_id": "PHY10_ch3_l1",
-   "order": 3,
+   "order": 24,
    "prereqs": [
     "PHY10_ch3_l1_k2"
    ],
@@ -239,7 +239,7 @@
   {
    "id": "PHY10_ch3_l2_k1",
    "lesson_id": "PHY10_ch3_l2",
-   "order": 1,
+   "order": 25,
    "prereqs": [
     "PHY10_ch3_l1_k1",
     "PHY10_ch3_l1_k3"
@@ -250,7 +250,7 @@
   {
    "id": "PHY10_ch3_l3_k1",
    "lesson_id": "PHY10_ch3_l3",
-   "order": 1,
+   "order": 26,
    "prereqs": [
     "PHY10_ch3_l1_k2"
    ],
@@ -260,7 +260,7 @@
   {
    "id": "PHY10_ch3_l3_k2",
    "lesson_id": "PHY10_ch3_l3",
-   "order": 2,
+   "order": 27,
    "prereqs": [
     "PHY10_ch3_l1_k1",
     "PHY10_ch3_l3_k1"
@@ -271,7 +271,7 @@
   {
    "id": "PHY10_ch3_l3_k3",
    "lesson_id": "PHY10_ch3_l3",
-   "order": 3,
+   "order": 28,
    "prereqs": [
     "PHY10_ch3_l3_k2",
     "PHY10_ch3_l2_k1"
@@ -282,7 +282,7 @@
   {
    "id": "PHY10_ch3_l4_k1",
    "lesson_id": "PHY10_ch3_l4",
-   "order": 1,
+   "order": 29,
    "prereqs": [
     "PHY10_ch3_l1_k2",
     "PHY10_ch3_l2_k1"
@@ -293,7 +293,7 @@
   {
    "id": "PHY10_ch3_l4_k2",
    "lesson_id": "PHY10_ch3_l4",
-   "order": 2,
+   "order": 30,
    "prereqs": [
     "PHY10_ch3_l4_k1"
    ],
@@ -303,7 +303,7 @@
   {
    "id": "PHY10_ch4_l1_k1",
    "lesson_id": "PHY10_ch4_l1",
-   "order": 1,
+   "order": 31,
    "prereqs": [],
    "title": "دما و تبدیل مقیاس‌های دماسنجی",
    "key_point": "رابطهٔ مقیاس‌ها: $T=\\theta+273$ (کلوین و سلسیوس) و $F=\\frac{9}{5}\\theta+32$ (فارنهایت). در دماسنج خطیِ دلخواه نسبت فاصله‌ها حفظ می‌شود: $\\frac{x-x_0}{x_{100}-x_0}=\\frac{\\theta}{100}$ که $x_0$ و $x_{100}$ عددهای نقطهٔ انجماد و جوش آب‌اند. مثلاً $20^\\circ\\text{C}$ همان $68^\\circ\\text{F}$ است. تلهٔ رایج: برای **تغییر** دما $\\Delta T=\\Delta\\theta$ و $\\Delta F=\\frac{9}{5}\\Delta\\theta$ است و عدد $273$ یا $32$ اضافه نمی‌شود."
@@ -311,7 +311,7 @@
   {
    "id": "PHY10_ch4_l1_k2",
    "lesson_id": "PHY10_ch4_l1",
-   "order": 2,
+   "order": 32,
    "prereqs": [
     "PHY10_ch4_l1_k1"
    ],
@@ -321,7 +321,7 @@
   {
    "id": "PHY10_ch4_l1_k3",
    "lesson_id": "PHY10_ch4_l1",
-   "order": 3,
+   "order": 33,
    "prereqs": [
     "PHY10_ch4_l1_k2"
    ],
@@ -331,7 +331,7 @@
   {
    "id": "PHY10_ch4_l1_k4",
    "lesson_id": "PHY10_ch4_l1",
-   "order": 4,
+   "order": 34,
    "prereqs": [
     "PHY10_ch4_l1_k3"
    ],
@@ -341,7 +341,7 @@
   {
    "id": "PHY10_ch4_l2_k1",
    "lesson_id": "PHY10_ch4_l2",
-   "order": 1,
+   "order": 35,
    "prereqs": [
     "PHY10_ch4_l1_k1"
    ],
@@ -351,7 +351,7 @@
   {
    "id": "PHY10_ch4_l2_k2",
    "lesson_id": "PHY10_ch4_l2",
-   "order": 2,
+   "order": 36,
    "prereqs": [
     "PHY10_ch4_l2_k1"
    ],
@@ -361,7 +361,7 @@
   {
    "id": "PHY10_ch4_l2_k3",
    "lesson_id": "PHY10_ch4_l2",
-   "order": 3,
+   "order": 37,
    "prereqs": [
     "PHY10_ch4_l2_k1"
    ],
@@ -371,7 +371,7 @@
   {
    "id": "PHY10_ch4_l2_k4",
    "lesson_id": "PHY10_ch4_l2",
-   "order": 4,
+   "order": 38,
    "prereqs": [
     "PHY10_ch4_l2_k2",
     "PHY10_ch4_l2_k3"
@@ -382,7 +382,7 @@
   {
    "id": "PHY10_ch4_l3_k1",
    "lesson_id": "PHY10_ch4_l3",
-   "order": 1,
+   "order": 39,
    "prereqs": [
     "PHY10_ch4_l2_k3"
    ],
@@ -392,7 +392,7 @@
   {
    "id": "PHY10_ch4_l3_k2",
    "lesson_id": "PHY10_ch4_l3",
-   "order": 2,
+   "order": 40,
    "prereqs": [
     "PHY10_ch4_l1_k1"
    ],
@@ -402,7 +402,7 @@
   {
    "id": "PHY10_ch4_l4_k1",
    "lesson_id": "PHY10_ch4_l4",
-   "order": 1,
+   "order": 41,
    "prereqs": [
     "PHY10_ch4_l1_k1"
    ],
@@ -412,7 +412,7 @@
   {
    "id": "PHY10_ch4_l4_k2",
    "lesson_id": "PHY10_ch4_l4",
-   "order": 2,
+   "order": 42,
    "prereqs": [
     "PHY10_ch4_l4_k1"
    ],
@@ -422,7 +422,7 @@
   {
    "id": "PHY10_ch4_l4_k3",
    "lesson_id": "PHY10_ch4_l4",
-   "order": 3,
+   "order": 43,
    "prereqs": [
     "PHY10_ch4_l4_k1"
    ],
@@ -432,7 +432,7 @@
   {
    "id": "PHY10_ch5_l1_k1",
    "lesson_id": "PHY10_ch5_l1",
-   "order": 1,
+   "order": 44,
    "prereqs": [],
    "title": "معادلهٔ حالت گاز کامل",
    "key_point": "برای گاز کامل داریم $PV=nRT$ ؛ پس برای مقدار معینی گاز، $\\dfrac{PV}{T}$ ثابت می‌ماند و اگر گاز نشت کند یا اضافه شود باید $n$ را هم در نظر گرفت.\nمثال: اگر در حجم ثابت دمای مطلق دو برابر شود، فشار هم دو برابر می‌شود.\nدام رایج: دما باید بر حسب کلوین ($T=\\theta+273$) و فشار باید فشار مطلق (فشار پیمانه‌ای به‌علاوهٔ فشار هوا) باشد و در $PV=nRT$ حجم بر حسب $\\mathrm{m^3}$ نوشته شود."
@@ -440,7 +440,7 @@
   {
    "id": "PHY10_ch5_l1_k2",
    "lesson_id": "PHY10_ch5_l1",
-   "order": 2,
+   "order": 45,
    "prereqs": [
     "PHY10_ch5_l1_k1"
    ],
@@ -450,7 +450,7 @@
   {
    "id": "PHY10_ch5_l2_k1",
    "lesson_id": "PHY10_ch5_l2",
-   "order": 1,
+   "order": 46,
    "prereqs": [
     "PHY10_ch5_l1_k2"
    ],
@@ -460,7 +460,7 @@
   {
    "id": "PHY10_ch5_l2_k2",
    "lesson_id": "PHY10_ch5_l2",
-   "order": 2,
+   "order": 47,
    "prereqs": [
     "PHY10_ch5_l2_k1"
    ],
@@ -470,7 +470,7 @@
   {
    "id": "PHY10_ch5_l2_k3",
    "lesson_id": "PHY10_ch5_l2",
-   "order": 3,
+   "order": 48,
    "prereqs": [
     "PHY10_ch5_l2_k1"
    ],
@@ -480,7 +480,7 @@
   {
    "id": "PHY10_ch5_l2_k4",
    "lesson_id": "PHY10_ch5_l2",
-   "order": 4,
+   "order": 49,
    "prereqs": [
     "PHY10_ch5_l2_k2",
     "PHY10_ch5_l2_k3"
@@ -491,7 +491,7 @@
   {
    "id": "PHY10_ch5_l3_k1",
    "lesson_id": "PHY10_ch5_l3",
-   "order": 1,
+   "order": 50,
    "prereqs": [
     "PHY10_ch5_l2_k4"
    ],
@@ -501,7 +501,7 @@
   {
    "id": "PHY10_ch5_l3_k2",
    "lesson_id": "PHY10_ch5_l3",
-   "order": 2,
+   "order": 51,
    "prereqs": [
     "PHY10_ch5_l3_k1"
    ],
@@ -511,7 +511,7 @@
   {
    "id": "PHY10_ch5_l3_k3",
    "lesson_id": "PHY10_ch5_l3",
-   "order": 3,
+   "order": 52,
    "prereqs": [
     "PHY10_ch5_l3_k1",
     "PHY10_ch5_l3_k2"
